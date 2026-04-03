@@ -49,7 +49,21 @@
     .logo { font-size: 17px; font-weight: 700; letter-spacing: -.4px; }
     .logo em { color: var(--accent); font-style: normal; }
 
-    nav { display: flex; gap: 4px; }
+    .sync-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 11px;
+      border-radius: 20px;
+      letter-spacing: .3px;
+      transition: all .3s;
+      white-space: nowrap;
+    }
+    .sync-ok      { background: rgba(16,185,129,.15); color: var(--success); }
+    .sync-pending { background: rgba(245,158,11,.15);  color: var(--warning); }
+    .sync-offline { background: rgba(239,68,68,.12);   color: var(--danger); }
+    .sync-loading { background: var(--surface2);        color: var(--muted); }
+
+    nav { display: flex; gap: 4px; flex-shrink: 0; }
 
     .nav-btn {
       background: none;
@@ -435,13 +449,199 @@
     }
     .toast.show { opacity: 1; transform: translateY(0); }
 
+    /* ── History tabs ────────────────────────────── */
+    .hist-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 5px;
+      margin-bottom: 20px;
+      width: fit-content;
+    }
+    .hist-tab {
+      background: none;
+      border: none;
+      color: var(--muted);
+      padding: 7px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13.5px;
+      font-weight: 500;
+      font-family: inherit;
+      transition: all .18s;
+    }
+    .hist-tab:hover  { background: var(--surface2); color: var(--text); }
+    .hist-tab.active { background: rgba(99,102,241,.15); color: var(--accent); }
+
+    /* ── Period filter ────────────────────────────── */
+    .period-filter {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 14px;
+      align-items: end;
+    }
+
+    .period-info {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 16px;
+      padding: 10px 14px;
+      background: var(--surface2);
+      border-radius: 8px;
+      border-left: 3px solid var(--accent);
+    }
+    .period-info strong { color: var(--text); }
+
+    .breakdown-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .breakdown-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 18px 14px;
+      text-align: center;
+    }
+    .breakdown-val {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .breakdown-lbl {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
     /* ── Responsive ───────────────────────────────── */
-    @media (max-width: 600px) {
-      header { padding: 0 16px; }
-      main   { padding: 24px 16px 50px; }
-      .form-grid  { grid-template-columns: 1fr; }
-      .pax-row    { grid-template-columns: 1fr; }
-      .preview-row { grid-template-columns: 1fr 1fr; }
+    @media (max-width: 640px) {
+
+      /* Header: logo+sync row 1, nav full-width row 2 */
+      header {
+        height: auto;
+        flex-wrap: wrap;
+        padding: 0;
+        justify-content: flex-start;
+      }
+      .logo {
+        flex: 1;
+        padding: 14px 16px;
+        font-size: 16px;
+      }
+      #sync-status {
+        align-self: center;
+        margin-right: 14px;
+        font-size: 10px;
+        padding: 3px 9px;
+      }
+      nav {
+        width: 100%;
+        order: 3;
+        border-top: 1px solid var(--border);
+      }
+      .nav-btn {
+        flex: 1;
+        border-radius: 0;
+        padding: 13px 8px;
+        font-size: 14px;
+        text-align: center;
+      }
+
+      /* Layout */
+      main { padding: 20px 14px 90px; }
+      .section-title { font-size: 18px; margin-bottom: 16px; }
+      .card { padding: 18px 15px; }
+
+      /* Inputs: 16px evita zoom en iOS */
+      input, select { font-size: 16px; padding: 12px 13px; }
+
+      /* Touch targets mínimos */
+      .btn         { min-height: 48px; }
+      .btn-sm      { min-height: 44px; padding: 8px 14px; }
+      .btn-icon    { min-height: 44px; min-width: 44px; padding: 8px 12px; }
+      button       { -webkit-tap-highlight-color: transparent; }
+
+      /* Form */
+      .form-grid { grid-template-columns: 1fr; gap: 14px; }
+      /* PAX: 3 columnas, los campos son números cortos */
+      .pax-row { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+      .source-tag { font-size: 10px; }
+
+      /* Preview */
+      .preview { padding: 14px 12px; }
+      .preview-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      .preview-val { font-size: 17px; }
+      .preview-totals { flex-direction: column; gap: 10px; }
+      .total-val { font-size: 16px; }
+      .total-lbl { font-size: 11px; }
+
+      /* Form actions: columna, botón principal arriba */
+      .form-actions { flex-direction: column; gap: 8px; }
+      .form-actions .btn { width: 100%; text-align: center; }
+
+      /* History tabs: ancho completo */
+      .hist-tabs { width: 100%; }
+      .hist-tab { flex: 1; text-align: center; padding: 9px 6px; font-size: 13px; }
+
+      /* History controls: columna */
+      .hist-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+      .month-nav { justify-content: space-between; }
+      .month-label { min-width: 0; flex: 1; font-size: 15px; }
+      .hist-controls .btn-ghost { text-align: center; }
+      .hist-controls span:empty { display: none; }
+
+      /* Summary / breakdown: 2 columnas fijas en móvil */
+      .summary-grid   { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .breakdown-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .sum-val        { font-size: 18px; }
+      .sum-card       { padding: 13px 10px; }
+      .breakdown-val  { font-size: 18px; }
+      .breakdown-card { padding: 13px 10px; }
+
+      /* Period filter */
+      .period-filter { grid-template-columns: 1fr 1fr; }
+      .period-filter .btn { grid-column: 1 / -1; }
+
+      /* Table: padding compacto */
+      thead th  { padding: 10px 9px; font-size: 10.5px; }
+      tbody td  { padding: 10px 9px; font-size: 12.5px; }
+      tfoot td  { padding: 10px 9px; font-size: 12px; }
+      /* Acciones en columna para no ensanchar la tabla */
+      .td-actions { flex-direction: column; gap: 4px; align-items: flex-start; }
+      .td-actions .btn-sm  { padding: 6px 10px; font-size: 11.5px; }
+      .td-actions .btn-icon { min-width: 36px; min-height: 36px; }
+
+      /* Modal: slide-up desde el fondo */
+      .overlay { align-items: flex-end; padding: 0; }
+      .modal {
+        border-radius: 18px 18px 0 0;
+        max-height: 90vh;
+        padding: 22px 18px 32px;
+      }
+      .modal .form-grid { grid-template-columns: 1fr; }
+      .modal .pax-row   { grid-template-columns: 1fr 1fr 1fr; }
+
+      /* Toast: ancho completo centrado */
+      .toast {
+        left: 14px;
+        right: 14px;
+        bottom: 14px;
+        text-align: center;
+      }
     }
   </style>
 </head>
@@ -449,6 +649,7 @@
 
 <header>
   <div class="logo"><em>Itaka</em> Comisiones</div>
+  <span id="sync-status" class="sync-pill sync-loading">Conectando…</span>
   <nav>
     <button class="nav-btn active" onclick="switchView('registro')">Registrar</button>
     <button class="nav-btn"        onclick="switchView('historial')">Historial</button>
@@ -472,7 +673,9 @@
         <div class="form-group">
           <label>Horario</label>
           <select id="horario">
+            <option value="SM 10:00">SM 10:00</option>
             <option value="SM 10:30">SM 10:30</option>
+            <option value="SM 13:00">SM 13:00</option>
             <option value="SM 13:30">SM 13:30</option>
           </select>
         </div>
@@ -549,39 +752,86 @@
 
   <!-- ═══════════════ HISTORIAL VIEW ══════════════ -->
   <div id="view-historial" class="view">
-    <h2 class="section-title">Historial mensual</h2>
+    <h2 class="section-title">Historial</h2>
 
-    <div class="hist-controls">
-      <div class="month-nav">
-        <button onclick="shiftMonth(-1)">&#8249;</button>
-        <span class="month-label" id="month-label">—</span>
-        <button onclick="shiftMonth(1)">&#8250;</button>
+    <!-- Mode tabs -->
+    <div class="hist-tabs">
+      <button class="hist-tab active" onclick="setHistMode('mes')">Por mes</button>
+      <button class="hist-tab"        onclick="setHistMode('periodo')">Por período</button>
+    </div>
+
+    <!-- ── Modo: por mes ── -->
+    <div id="hist-mes">
+      <div class="hist-controls">
+        <div class="month-nav">
+          <button onclick="shiftMonth(-1)">&#8249;</button>
+          <span class="month-label" id="month-label">—</span>
+          <button onclick="shiftMonth(1)">&#8250;</button>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="exportCSV()">Exportar CSV</button>
       </div>
-      <button class="btn btn-ghost btn-sm" onclick="exportCSV()">Exportar CSV</button>
+
+      <div class="summary-grid" id="summary-grid"></div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th><th>Horario</th><th>PAX</th>
+              <th>Civitatis</th><th>Viabam</th><th>Web</th>
+              <th>Comisiones</th><th>Efectivo</th><th>Neta</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="hist-body"></tbody>
+          <tfoot id="hist-foot"></tfoot>
+        </table>
+      </div>
     </div>
 
-    <div class="summary-grid" id="summary-grid"></div>
+    <!-- ── Modo: por período ── -->
+    <div id="hist-periodo" style="display:none">
+      <div class="card">
+        <div class="period-filter">
+          <div class="form-group">
+            <label>Desde</label>
+            <input type="date" id="p-desde">
+          </div>
+          <div class="form-group">
+            <label>Hasta</label>
+            <input type="date" id="p-hasta">
+          </div>
+          <button class="btn" onclick="aplicarFiltro()">Aplicar</button>
+        </div>
+      </div>
 
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Fecha</th>
-            <th>Horario</th>
-            <th>PAX</th>
-            <th>Civitatis</th>
-            <th>Viabam</th>
-            <th>Web</th>
-            <th>Comisiones</th>
-            <th>Efectivo</th>
-            <th>Neta</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="hist-body"></tbody>
-        <tfoot id="hist-foot"></tfoot>
-      </table>
+      <div id="periodo-results" style="display:none">
+        <div class="period-info" id="periodo-info"></div>
+
+        <!-- Resumen de comisiones por origen -->
+        <div class="breakdown-grid" id="breakdown-grid"></div>
+
+        <!-- Controles de la tabla del período -->
+        <div class="hist-controls" style="margin-bottom:16px">
+          <span></span>
+          <button class="btn btn-ghost btn-sm" onclick="exportCSVPeriodo()">Exportar CSV período</button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th><th>Horario</th><th>PAX</th>
+                <th>Civitatis</th><th>Viabam</th><th>Web</th>
+                <th>Comisiones</th><th>Efectivo</th><th>Neta</th>
+              </tr>
+            </thead>
+            <tbody id="periodo-body"></tbody>
+            <tfoot id="periodo-foot"></tfoot>
+          </table>
+        </div>
+      </div>
     </div>
+
   </div>
 
 </main>
@@ -601,7 +851,9 @@
       <div class="form-group">
         <label>Horario</label>
         <select id="e-horario">
+          <option value="SM 10:00">SM 10:00</option>
           <option value="SM 10:30">SM 10:30</option>
+          <option value="SM 13:00">SM 13:00</option>
           <option value="SM 13:30">SM 13:30</option>
         </select>
       </div>
@@ -636,12 +888,37 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
 <script>
+  /* ────────────────────────── Firebase ──────────────── */
+  firebase.initializeApp({
+    apiKey:            "AIzaSyC5bh7CkjIPhcSyySJNoWkGJmndWvCR_Q",
+    authDomain:        "app-comisiones-itaka.firebaseapp.com",
+    projectId:         "app-comisiones-itaka",
+    storageBucket:     "app-comisiones-itaka.firebasestorage.app",
+    messagingSenderId: "314198050943",
+    appId:             "1:314198050943:web:ea70b85f38c354a87a574a"
+  });
+
+  const db  = firebase.firestore();
+  const col = db.collection('registros');
+
+  // Offline persistence: la app funciona sin internet
+  db.enablePersistence({ synchronizeTabs: true }).catch(err => {
+    if (err.code === 'failed-precondition') {
+      console.warn('Persistencia offline: solo una pestaña a la vez.');
+    } else if (err.code === 'unimplemented') {
+      console.warn('El navegador no soporta persistencia offline.');
+    }
+  });
+
   /* ────────────────────────── Constants ──────────────── */
-  const RATES = { civitatis: 3, viabam: 2.5, web: 2 };
+  const RATES  = { civitatis: 3, viabam: 2.5, web: 2 };
   const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
                   'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  const KEY = 'itaka_comisiones_v1';
 
   /* ────────────────────────── State ──────────────────── */
   let records   = [];
@@ -650,23 +927,48 @@
 
   /* ────────────────────────── Init ───────────────────── */
   function init() {
-    const now   = new Date();
-    curYear     = now.getFullYear();
-    curMonth    = now.getMonth();
+    const now = new Date();
+    curYear   = now.getFullYear();
+    curMonth  = now.getMonth();
 
     document.getElementById('fecha').value = toISO(now);
-
-    const saved = localStorage.getItem(KEY);
-    if (saved) records = JSON.parse(saved);
-
     calcPreview();
-    renderHistory();
+
+    // Listener en tiempo real: actualiza la UI en cualquier dispositivo
+    col.onSnapshot({ includeMetadataChanges: true }, snapshot => {
+      records = snapshot.docs.map(doc => doc.data());
+      sortRecords();
+      renderHistory();
+      updateSyncBadge(snapshot.metadata);
+    }, err => {
+      console.error('Firestore error:', err);
+      setSyncBadge('offline', 'Sin conexión');
+    });
+
+    // Detectar cambios de red
+    window.addEventListener('online',  () => setSyncBadge('loading', 'Reconectando…'));
+    window.addEventListener('offline', () => setSyncBadge('offline', 'Sin conexión'));
+  }
+
+  /* ────────────────────────── Sync badge ─────────────── */
+  function updateSyncBadge(meta) {
+    if (meta.hasPendingWrites) {
+      setSyncBadge('pending', 'Guardando…');
+    } else if (meta.fromCache) {
+      setSyncBadge('offline', 'Sin conexión');
+    } else {
+      setSyncBadge('ok', 'Sincronizado');
+    }
+  }
+
+  function setSyncBadge(state, label) {
+    const el = document.getElementById('sync-status');
+    el.className  = `sync-pill sync-${state}`;
+    el.textContent = label;
   }
 
   /* ────────────────────────── Helpers ────────────────── */
-  function toISO(d) {
-    return d.toISOString().split('T')[0];
-  }
+  function toISO(d) { return d.toISOString().split('T')[0]; }
 
   function fmtDate(iso) {
     const [y, m, d] = iso.split('-');
@@ -677,14 +979,6 @@
     return '€' + Math.abs(v).toFixed(2).replace('.', ',');
   }
 
-  function signed(v) {
-    return (v < 0 ? '−' : '+') + euro(v);
-  }
-
-  function persist() {
-    localStorage.setItem(KEY, JSON.stringify(records));
-  }
-
   function sortRecords() {
     records.sort((a, b) =>
       a.fecha.localeCompare(b.fecha) || a.horario.localeCompare(b.horario));
@@ -692,17 +986,17 @@
 
   /* ────────────────────────── Calculation ────────────── */
   function compute(civ, via, web, cash) {
-    const civFee  = civ  * RATES.civitatis;
-    const viaFee  = via  * RATES.viabam;
-    const webFee  = web  * RATES.web;
+    const civFee  = civ * RATES.civitatis;
+    const viaFee  = via * RATES.viabam;
+    const webFee  = web * RATES.web;
     const totComm = civFee + viaFee + webFee;
     return {
-      totalPax:    civ + via + web,
+      totalPax:     civ + via + web,
       civitatisFee: civFee,
-      viabamFee:   viaFee,
+      viabamFee:    viaFee,
       webFee,
       totalComm,
-      netGain:     cash - totComm
+      netGain:      cash - totComm
     };
   }
 
@@ -731,7 +1025,7 @@
   function setText(id, v) { document.getElementById(id).textContent = v; }
 
   /* ────────────────────────── Save new ───────────────── */
-  function guardarRegistro() {
+  async function guardarRegistro() {
     const fecha   = document.getElementById('fecha').value;
     const horario = document.getElementById('horario').value;
     const civ     = int('civitatis');
@@ -741,25 +1035,27 @@
 
     if (!fecha) { toast('Selecciona una fecha', 'err'); return; }
 
-    const c = compute(civ, via, web, cash);
-
-    records.push({
-      id: Date.now(),
-      fecha, horario,
+    const id     = Date.now();
+    const record = {
+      id, fecha, horario,
       civitatis: civ, viabam: via, web,
       efectivo: cash,
-      ...c
-    });
+      ...compute(civ, via, web, cash)
+    };
 
-    sortRecords();
-    persist();
-    toast('Registro guardado');
-    resetForm();
+    try {
+      await col.doc(String(id)).set(record);
+      toast('Registro guardado');
+      resetForm();
+    } catch (e) {
+      console.error(e);
+      toast('Error al guardar', 'err');
+    }
   }
 
   function resetForm() {
-    document.getElementById('fecha').value    = toISO(new Date());
-    document.getElementById('horario').value  = 'SM 10:30';
+    document.getElementById('fecha').value     = toISO(new Date());
+    document.getElementById('horario').value   = 'SM 10:30';
     document.getElementById('civitatis').value = 0;
     document.getElementById('viabam').value    = 0;
     document.getElementById('web').value       = 0;
@@ -788,10 +1084,10 @@
   function renderSummary(list) {
     const s = list.reduce((a, r) => {
       a.tours++;
-      a.pax   += r.totalPax;
-      a.comm  += r.totalComm;
-      a.cash  += r.efectivo;
-      a.net   += r.netGain;
+      a.pax  += r.totalPax;
+      a.comm += r.totalComm;
+      a.cash += r.efectivo;
+      a.net  += r.netGain;
       return a;
     }, { tours: 0, pax: 0, comm: 0, cash: 0, net: 0 });
 
@@ -839,7 +1135,7 @@
       <tr>
         <td>${fmtDate(r.fecha)}</td>
         <td>
-          <span class="badge ${r.horario === 'SM 10:30' ? 'badge-am' : 'badge-pm'}">
+          <span class="badge ${r.horario.includes('10') ? 'badge-am' : 'badge-pm'}">
             ${r.horario}
           </span>
         </td>
@@ -905,32 +1201,30 @@
     document.getElementById('overlay').classList.add('open');
   }
 
-  function saveEdit() {
-    const idx = records.findIndex(x => x.id === editingId);
-    if (idx === -1) return;
-
+  async function saveEdit() {
     const fecha   = document.getElementById('e-fecha').value;
     const horario = document.getElementById('e-horario').value;
-    const civ     = parseInt(document.getElementById('e-civ').value)  || 0;
-    const via     = parseInt(document.getElementById('e-via').value)  || 0;
-    const web     = parseInt(document.getElementById('e-web').value)  || 0;
+    const civ     = parseInt(document.getElementById('e-civ').value)    || 0;
+    const via     = parseInt(document.getElementById('e-via').value)    || 0;
+    const web     = parseInt(document.getElementById('e-web').value)    || 0;
     const cash    = parseFloat(document.getElementById('e-cash').value) || 0;
 
-    const c = compute(civ, via, web, cash);
-
-    records[idx] = {
+    const updated = {
       id: editingId,
       fecha, horario,
       civitatis: civ, viabam: via, web,
       efectivo: cash,
-      ...c
+      ...compute(civ, via, web, cash)
     };
 
-    sortRecords();
-    persist();
-    closeModal();
-    renderHistory();
-    toast('Registro actualizado');
+    try {
+      await col.doc(String(editingId)).set(updated);
+      closeModal();
+      toast('Registro actualizado');
+    } catch (e) {
+      console.error(e);
+      toast('Error al guardar', 'err');
+    }
   }
 
   function closeModal() {
@@ -943,12 +1237,15 @@
   }
 
   /* ────────────────────────── Delete ─────────────────── */
-  function deleteRecord(id) {
+  async function deleteRecord(id) {
     if (!confirm('¿Eliminar este registro?')) return;
-    records = records.filter(r => r.id !== id);
-    persist();
-    renderHistory();
-    toast('Registro eliminado', 'warn');
+    try {
+      await col.doc(String(id)).delete();
+      toast('Registro eliminado', 'warn');
+    } catch (e) {
+      console.error(e);
+      toast('Error al eliminar', 'err');
+    }
   }
 
   /* ────────────────────────── CSV Export ─────────────── */
@@ -982,6 +1279,153 @@
     const a    = document.createElement('a');
     a.href     = url;
     a.download = `itaka_comisiones_${pfx}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('CSV exportado');
+  }
+
+  /* ────────────────────────── History mode tabs ──────── */
+  function setHistMode(mode) {
+    document.querySelectorAll('.hist-tab').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.hist-tab[onclick="setHistMode('${mode}')"]`).classList.add('active');
+    document.getElementById('hist-mes').style.display     = mode === 'mes'     ? '' : 'none';
+    document.getElementById('hist-periodo').style.display = mode === 'periodo' ? '' : 'none';
+  }
+
+  /* ────────────────────────── Period filter ───────────── */
+  let periodoFiltered = [];
+
+  function aplicarFiltro() {
+    const desde = document.getElementById('p-desde').value;
+    const hasta = document.getElementById('p-hasta').value;
+
+    if (!desde || !hasta) { toast('Seleccioná ambas fechas', 'warn'); return; }
+    if (desde > hasta)    { toast('La fecha inicial debe ser anterior a la final', 'err'); return; }
+
+    periodoFiltered = records.filter(r => r.fecha >= desde && r.fecha <= hasta);
+
+    document.getElementById('periodo-results').style.display = '';
+    renderPeriodo(periodoFiltered, desde, hasta);
+  }
+
+  function renderPeriodo(list, desde, hasta) {
+    // Info bar
+    const count = list.length;
+    document.getElementById('periodo-info').innerHTML =
+      `Período: <strong>${fmtDate(desde)}</strong> → <strong>${fmtDate(hasta)}</strong>
+       &nbsp;·&nbsp; <strong>${count}</strong> tour${count !== 1 ? 's' : ''}`;
+
+    // Breakdown por origen
+    const s = list.reduce((a, r) => {
+      a.civComm += r.civitatisFee;
+      a.viaComm += r.viabamFee;
+      a.webComm += r.webFee;
+      a.total   += r.totalComm;
+      a.cash    += r.efectivo;
+      a.net     += r.netGain;
+      return a;
+    }, { civComm: 0, viaComm: 0, webComm: 0, total: 0, cash: 0, net: 0 });
+
+    document.getElementById('breakdown-grid').innerHTML = `
+      <div class="breakdown-card">
+        <div class="breakdown-val c-civ">${euro(s.civComm)}</div>
+        <div class="breakdown-lbl">Civitatis</div>
+      </div>
+      <div class="breakdown-card">
+        <div class="breakdown-val c-via">${euro(s.viaComm)}</div>
+        <div class="breakdown-lbl">Viabam</div>
+      </div>
+      <div class="breakdown-card">
+        <div class="breakdown-val c-web">${euro(s.webComm)}</div>
+        <div class="breakdown-lbl">Web</div>
+      </div>
+      <div class="breakdown-card" style="border-color:var(--danger);background:rgba(239,68,68,.04)">
+        <div class="breakdown-val c-err">${euro(s.total)}</div>
+        <div class="breakdown-lbl">Total comisiones</div>
+      </div>
+      <div class="breakdown-card">
+        <div class="breakdown-val">${euro(s.cash)}</div>
+        <div class="breakdown-lbl">Efectivo</div>
+      </div>
+      <div class="breakdown-card">
+        <div class="breakdown-val ${s.net >= 0 ? 'c-ok' : 'c-err'}">${euro(s.net)}</div>
+        <div class="breakdown-lbl">Ganancia neta</div>
+      </div>
+    `;
+
+    // Tabla del período
+    const tbody = document.getElementById('periodo-body');
+    const tfoot = document.getElementById('periodo-foot');
+
+    if (list.length === 0) {
+      tbody.innerHTML = `
+        <tr><td colspan="9">
+          <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <div class="empty-msg">Sin registros en este período</div>
+          </div>
+        </td></tr>`;
+      tfoot.innerHTML = '';
+      return;
+    }
+
+    tbody.innerHTML = list.map(r => `
+      <tr>
+        <td>${fmtDate(r.fecha)}</td>
+        <td><span class="badge ${r.horario.includes('10') ? 'badge-am' : 'badge-pm'}">${r.horario}</span></td>
+        <td><strong>${r.totalPax}</strong></td>
+        <td><span class="c-civ">${r.civitatis}</span> <span class="sub">${euro(r.civitatisFee)}</span></td>
+        <td><span class="c-via">${r.viabam}</span> <span class="sub">${euro(r.viabamFee)}</span></td>
+        <td><span class="c-web">${r.web}</span> <span class="sub">${euro(r.webFee)}</span></td>
+        <td class="c-err"><strong>${euro(r.totalComm)}</strong></td>
+        <td>${euro(r.efectivo)}</td>
+        <td class="${r.netGain >= 0 ? 'c-ok' : 'c-err'}"><strong>${euro(r.netGain)}</strong></td>
+      </tr>
+    `).join('');
+
+    tfoot.innerHTML = `
+      <tr>
+        <td colspan="2">TOTAL PERÍODO</td>
+        <td>—</td>
+        <td colspan="3">—</td>
+        <td class="c-err">${euro(s.total)}</td>
+        <td>${euro(s.cash)}</td>
+        <td class="${s.net >= 0 ? 'c-ok' : 'c-err'}">${euro(s.net)}</td>
+      </tr>
+    `;
+  }
+
+  /* ────────────────────────── CSV export período ──────── */
+  function exportCSVPeriodo() {
+    if (!periodoFiltered.length) { toast('No hay datos en el período', 'warn'); return; }
+
+    const desde = document.getElementById('p-desde').value;
+    const hasta = document.getElementById('p-hasta').value;
+
+    const heads = [
+      'Fecha','Horario','PAX Total',
+      'Civitatis PAX','Civitatis €',
+      'Viabam PAX','Viabam €',
+      'Web PAX','Web €',
+      'Total Comisiones','Efectivo','Ganancia Neta'
+    ];
+
+    const rows = periodoFiltered.map(r => [
+      r.fecha, r.horario, r.totalPax,
+      r.civitatis,  r.civitatisFee.toFixed(2),
+      r.viabam,     r.viabamFee.toFixed(2),
+      r.web,        r.webFee.toFixed(2),
+      r.totalComm.toFixed(2),
+      r.efectivo.toFixed(2),
+      r.netGain.toFixed(2)
+    ]);
+
+    const csv  = [heads, ...rows].map(r => r.join(';')).join('\r\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `itaka_periodo_${desde}_${hasta}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     toast('CSV exportado');
