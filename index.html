@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Itaka — Comisiones</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #0f1117;
+      --surface:   #1a1d27;
+      --surface2:  #222636;
+      --border:    #2d3148;
+      --accent:    #6366f1;
+      --accent-h:  #4f52d8;
+      --text:      #e2e8f0;
+      --muted:     #8892a4;
+      --success:   #10b981;
+      --warning:   #f59e0b;
+      --danger:    #ef4444;
+      --civ:       #818cf8;
+      --via:       #fbbf24;
+      --web:       #34d399;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ───────────────────────────────────── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+    }
+
+    .logo { font-size: 17px; font-weight: 700; letter-spacing: -.4px; }
+    .logo em { color: var(--accent); font-style: normal; }
+
+    nav { display: flex; gap: 4px; }
+
+    .nav-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      padding: 7px 16px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 13.5px;
+      font-weight: 500;
+      font-family: inherit;
+      transition: all .18s;
+    }
+    .nav-btn:hover { background: var(--surface2); color: var(--text); }
+    .nav-btn.active { background: rgba(99,102,241,.15); color: var(--accent); }
+
+    /* ── Layout ───────────────────────────────────── */
+    main { max-width: 920px; margin: 0 auto; padding: 36px 24px 60px; }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    .section-title {
+      font-size: 21px;
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+
+    /* ── Card ─────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 26px;
+      margin-bottom: 20px;
+    }
+
+    /* ── Form ─────────────────────────────────────── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .6px;
+    }
+
+    input, select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 13px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      width: 100%;
+      outline: none;
+      transition: border-color .18s;
+      -moz-appearance: textfield;
+    }
+    input::-webkit-inner-spin-button { display: none; }
+    input:focus, select:focus { border-color: var(--accent); }
+    select option { background: var(--surface2); }
+
+    /* ── PAX sources ──────────────────────────────── */
+    .pax-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .source-tag {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 6px;
+    }
+
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .dot-civ { background: var(--civ); }
+    .dot-via { background: var(--via); }
+    .dot-web { background: var(--web); }
+
+    /* ── Preview ──────────────────────────────────── */
+    .preview {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin-top: 22px;
+    }
+
+    .preview-header {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      margin-bottom: 14px;
+    }
+
+    .preview-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .preview-cell { text-align: center; }
+
+    .preview-val {
+      font-size: 19px;
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .preview-lbl {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 14px 0;
+    }
+
+    .preview-totals {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .total-block { text-align: center; }
+    .total-lbl { font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+    .total-val { font-size: 18px; font-weight: 700; }
+
+    /* colour helpers */
+    .c-civ  { color: var(--civ); }
+    .c-via  { color: var(--via); }
+    .c-web  { color: var(--web); }
+    .c-acc  { color: var(--accent); }
+    .c-ok   { color: var(--success); }
+    .c-err  { color: var(--danger); }
+    .c-warn { color: var(--warning); }
+
+    /* ── Buttons ──────────────────────────────────── */
+    .btn {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 11px 22px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background .18s;
+    }
+    .btn:hover { background: var(--accent-h); }
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: var(--border); }
+    .btn-icon {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid transparent;
+      padding: 5px 9px;
+      font-size: 13px;
+    }
+    .btn-icon:hover { color: var(--danger); border-color: var(--danger); background: rgba(239,68,68,.08); }
+    .btn-sm { padding: 7px 14px; font-size: 12.5px; border-radius: 7px; }
+    .btn-full { width: 100%; }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    /* ── History controls ─────────────────────────── */
+    .hist-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .month-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 5px 8px;
+    }
+    .month-nav button {
+      background: none;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+      padding: 3px 10px;
+      border-radius: 5px;
+      font-size: 18px;
+      line-height: 1;
+      transition: background .15s;
+    }
+    .month-nav button:hover { background: var(--surface2); }
+    .month-label {
+      font-weight: 600;
+      font-size: 14px;
+      min-width: 140px;
+      text-align: center;
+    }
+
+    /* ── Summary cards ────────────────────────────── */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .sum-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 16px 14px;
+      text-align: center;
+    }
+    .sum-val {
+      font-size: 21px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .sum-lbl {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
+    /* ── Table ────────────────────────────────────── */
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+    thead th {
+      background: var(--surface2);
+      padding: 11px 14px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-top: 1px solid var(--border);
+      transition: background .12s;
+    }
+    tbody tr:hover { background: rgba(99,102,241,.05); }
+    tbody td { padding: 11px 14px; vertical-align: middle; }
+
+    tfoot td {
+      padding: 11px 14px;
+      font-weight: 700;
+      border-top: 2px solid var(--border);
+      background: var(--surface);
+      font-size: 13px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 5px;
+      font-size: 11.5px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .badge-am { background: rgba(129,140,248,.15); color: var(--civ); }
+    .badge-pm { background: rgba(251,191,36,.15);  color: var(--via); }
+
+    .sub { font-size: 11px; color: var(--muted); }
+
+    .td-actions { display: flex; gap: 5px; align-items: center; }
+
+    .empty-state {
+      text-align: center;
+      padding: 56px 20px;
+      color: var(--muted);
+    }
+    .empty-icon { font-size: 38px; margin-bottom: 12px; }
+    .empty-msg  { font-size: 14px; }
+
+    /* ── Modal ────────────────────────────────────── */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.65);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 20px;
+    }
+    .overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+    .modal-title { font-size: 17px; font-weight: 700; }
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 5px;
+      transition: color .15s;
+    }
+    .close-btn:hover { color: var(--text); }
+
+    /* ── Toast ────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--success);
+      color: #fff;
+      padding: 11px 20px;
+      border-radius: 9px;
+      font-size: 13.5px;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: all .3s;
+      z-index: 500;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    /* ── Responsive ───────────────────────────────── */
+    @media (max-width: 600px) {
+      header { padding: 0 16px; }
+      main   { padding: 24px 16px 50px; }
+      .form-grid  { grid-template-columns: 1fr; }
+      .pax-row    { grid-template-columns: 1fr; }
+      .preview-row { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><em>Itaka</em> Comisiones</div>
+  <nav>
+    <button class="nav-btn active" onclick="switchView('registro')">Registrar</button>
+    <button class="nav-btn"        onclick="switchView('historial')">Historial</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ═══════════════ REGISTRO VIEW ═══════════════ -->
+  <div id="view-registro" class="view active">
+    <h2 class="section-title">Nuevo registro</h2>
+
+    <div class="card">
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>Fecha</label>
+          <input type="date" id="fecha">
+        </div>
+
+        <div class="form-group">
+          <label>Horario</label>
+          <select id="horario">
+            <option value="SM 10:30">SM 10:30</option>
+            <option value="SM 13:30">SM 13:30</option>
+          </select>
+        </div>
+
+        <div class="form-group full">
+          <label>Pasajeros por origen</label>
+          <div class="pax-row">
+            <div>
+              <div class="source-tag"><span class="dot dot-civ"></span>Civitatis · ×€3</div>
+              <input type="number" id="civitatis" min="0" value="0" oninput="calcPreview()">
+            </div>
+            <div>
+              <div class="source-tag"><span class="dot dot-via"></span>Viabam · ×€2.50</div>
+              <input type="number" id="viabam" min="0" value="0" oninput="calcPreview()">
+            </div>
+            <div>
+              <div class="source-tag"><span class="dot dot-web"></span>Web · ×€2</div>
+              <input type="number" id="web" min="0" value="0" oninput="calcPreview()">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Efectivo recibido (€)</label>
+          <input type="number" id="efectivo" min="0" step="0.01" value="0" oninput="calcPreview()">
+        </div>
+
+      </div>
+
+      <!-- Live preview -->
+      <div class="preview">
+        <div class="preview-header">Cálculo automático</div>
+        <div class="preview-row">
+          <div class="preview-cell">
+            <div class="preview-val c-acc" id="pv-pax">0</div>
+            <div class="preview-lbl">PAX total</div>
+          </div>
+          <div class="preview-cell">
+            <div class="preview-val c-civ" id="pv-civ">€0</div>
+            <div class="preview-lbl">Civitatis</div>
+          </div>
+          <div class="preview-cell">
+            <div class="preview-val c-via" id="pv-via">€0</div>
+            <div class="preview-lbl">Viabam</div>
+          </div>
+          <div class="preview-cell">
+            <div class="preview-val c-web" id="pv-web">€0</div>
+            <div class="preview-lbl">Web</div>
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="preview-totals">
+          <div class="total-block">
+            <div class="total-lbl">Total comisiones</div>
+            <div class="total-val c-err" id="pv-comm">€0</div>
+          </div>
+          <div class="total-block">
+            <div class="total-lbl">Efectivo</div>
+            <div class="total-val" id="pv-cash">€0</div>
+          </div>
+          <div class="total-block">
+            <div class="total-lbl">Ganancia neta</div>
+            <div class="total-val c-ok" id="pv-net">€0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-full" onclick="guardarRegistro()">Guardar registro</button>
+        <button class="btn btn-ghost" onclick="resetForm()">Limpiar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ HISTORIAL VIEW ══════════════ -->
+  <div id="view-historial" class="view">
+    <h2 class="section-title">Historial mensual</h2>
+
+    <div class="hist-controls">
+      <div class="month-nav">
+        <button onclick="shiftMonth(-1)">&#8249;</button>
+        <span class="month-label" id="month-label">—</span>
+        <button onclick="shiftMonth(1)">&#8250;</button>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="exportCSV()">Exportar CSV</button>
+    </div>
+
+    <div class="summary-grid" id="summary-grid"></div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Horario</th>
+            <th>PAX</th>
+            <th>Civitatis</th>
+            <th>Viabam</th>
+            <th>Web</th>
+            <th>Comisiones</th>
+            <th>Efectivo</th>
+            <th>Neta</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="hist-body"></tbody>
+        <tfoot id="hist-foot"></tfoot>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══════════════ EDIT MODAL ═══════════════════ -->
+<div class="overlay" id="overlay" onclick="onOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">Editar registro</div>
+      <button class="close-btn" onclick="closeModal()">×</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Fecha</label>
+        <input type="date" id="e-fecha">
+      </div>
+      <div class="form-group">
+        <label>Horario</label>
+        <select id="e-horario">
+          <option value="SM 10:30">SM 10:30</option>
+          <option value="SM 13:30">SM 13:30</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>Pasajeros por origen</label>
+        <div class="pax-row">
+          <div>
+            <div class="source-tag"><span class="dot dot-civ"></span>Civitatis · ×€3</div>
+            <input type="number" id="e-civ" min="0" value="0">
+          </div>
+          <div>
+            <div class="source-tag"><span class="dot dot-via"></span>Viabam · ×€2.50</div>
+            <input type="number" id="e-via" min="0" value="0">
+          </div>
+          <div>
+            <div class="source-tag"><span class="dot dot-web"></span>Web · ×€2</div>
+            <input type="number" id="e-web" min="0" value="0">
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Efectivo recibido (€)</label>
+        <input type="number" id="e-cash" min="0" step="0.01" value="0">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-full" onclick="saveEdit()">Guardar cambios</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  /* ────────────────────────── Constants ──────────────── */
+  const RATES = { civitatis: 3, viabam: 2.5, web: 2 };
+  const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const KEY = 'itaka_comisiones_v1';
+
+  /* ────────────────────────── State ──────────────────── */
+  let records   = [];
+  let curYear, curMonth;
+  let editingId = null;
+
+  /* ────────────────────────── Init ───────────────────── */
+  function init() {
+    const now   = new Date();
+    curYear     = now.getFullYear();
+    curMonth    = now.getMonth();
+
+    document.getElementById('fecha').value = toISO(now);
+
+    const saved = localStorage.getItem(KEY);
+    if (saved) records = JSON.parse(saved);
+
+    calcPreview();
+    renderHistory();
+  }
+
+  /* ────────────────────────── Helpers ────────────────── */
+  function toISO(d) {
+    return d.toISOString().split('T')[0];
+  }
+
+  function fmtDate(iso) {
+    const [y, m, d] = iso.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  function euro(v) {
+    return '€' + Math.abs(v).toFixed(2).replace('.', ',');
+  }
+
+  function signed(v) {
+    return (v < 0 ? '−' : '+') + euro(v);
+  }
+
+  function persist() {
+    localStorage.setItem(KEY, JSON.stringify(records));
+  }
+
+  function sortRecords() {
+    records.sort((a, b) =>
+      a.fecha.localeCompare(b.fecha) || a.horario.localeCompare(b.horario));
+  }
+
+  /* ────────────────────────── Calculation ────────────── */
+  function compute(civ, via, web, cash) {
+    const civFee  = civ  * RATES.civitatis;
+    const viaFee  = via  * RATES.viabam;
+    const webFee  = web  * RATES.web;
+    const totComm = civFee + viaFee + webFee;
+    return {
+      totalPax:    civ + via + web,
+      civitatisFee: civFee,
+      viabamFee:   viaFee,
+      webFee,
+      totalComm,
+      netGain:     cash - totComm
+    };
+  }
+
+  /* ────────────────────────── Preview ────────────────── */
+  function calcPreview() {
+    const civ  = int('civitatis');
+    const via  = int('viabam');
+    const web  = int('web');
+    const cash = flt('efectivo');
+    const c    = compute(civ, via, web, cash);
+
+    setText('pv-pax',  c.totalPax);
+    setText('pv-civ',  euro(c.civitatisFee));
+    setText('pv-via',  euro(c.viabamFee));
+    setText('pv-web',  euro(c.webFee));
+    setText('pv-comm', euro(c.totalComm));
+    setText('pv-cash', euro(cash));
+
+    const netEl = document.getElementById('pv-net');
+    netEl.textContent = euro(c.netGain);
+    netEl.className   = 'total-val ' + (c.netGain >= 0 ? 'c-ok' : 'c-err');
+  }
+
+  function int(id) { return parseInt(document.getElementById(id).value) || 0; }
+  function flt(id) { return parseFloat(document.getElementById(id).value) || 0; }
+  function setText(id, v) { document.getElementById(id).textContent = v; }
+
+  /* ────────────────────────── Save new ───────────────── */
+  function guardarRegistro() {
+    const fecha   = document.getElementById('fecha').value;
+    const horario = document.getElementById('horario').value;
+    const civ     = int('civitatis');
+    const via     = int('viabam');
+    const web     = int('web');
+    const cash    = flt('efectivo');
+
+    if (!fecha) { toast('Selecciona una fecha', 'err'); return; }
+
+    const c = compute(civ, via, web, cash);
+
+    records.push({
+      id: Date.now(),
+      fecha, horario,
+      civitatis: civ, viabam: via, web,
+      efectivo: cash,
+      ...c
+    });
+
+    sortRecords();
+    persist();
+    toast('Registro guardado');
+    resetForm();
+  }
+
+  function resetForm() {
+    document.getElementById('fecha').value    = toISO(new Date());
+    document.getElementById('horario').value  = 'SM 10:30';
+    document.getElementById('civitatis').value = 0;
+    document.getElementById('viabam').value    = 0;
+    document.getElementById('web').value       = 0;
+    document.getElementById('efectivo').value  = 0;
+    calcPreview();
+  }
+
+  /* ────────────────────────── History ────────────────── */
+  function shiftMonth(delta) {
+    curMonth += delta;
+    if (curMonth > 11) { curMonth = 0;  curYear++; }
+    if (curMonth <  0) { curMonth = 11; curYear--; }
+    renderHistory();
+  }
+
+  function renderHistory() {
+    setText('month-label', `${MONTHS[curMonth]} ${curYear}`);
+
+    const pfx      = `${curYear}-${String(curMonth + 1).padStart(2, '0')}`;
+    const filtered = records.filter(r => r.fecha.startsWith(pfx));
+
+    renderSummary(filtered);
+    renderTable(filtered);
+  }
+
+  function renderSummary(list) {
+    const s = list.reduce((a, r) => {
+      a.tours++;
+      a.pax   += r.totalPax;
+      a.comm  += r.totalComm;
+      a.cash  += r.efectivo;
+      a.net   += r.netGain;
+      return a;
+    }, { tours: 0, pax: 0, comm: 0, cash: 0, net: 0 });
+
+    document.getElementById('summary-grid').innerHTML = `
+      <div class="sum-card">
+        <div class="sum-val c-acc">${s.tours}</div>
+        <div class="sum-lbl">Tours</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-val c-acc">${s.pax}</div>
+        <div class="sum-lbl">PAX total</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-val c-err">${euro(s.comm)}</div>
+        <div class="sum-lbl">Comisiones</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-val">${euro(s.cash)}</div>
+        <div class="sum-lbl">Efectivo</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-val ${s.net >= 0 ? 'c-ok' : 'c-err'}">${euro(s.net)}</div>
+        <div class="sum-lbl">Ganancia neta</div>
+      </div>
+    `;
+  }
+
+  function renderTable(list) {
+    const tbody = document.getElementById('hist-body');
+    const tfoot = document.getElementById('hist-foot');
+
+    if (list.length === 0) {
+      tbody.innerHTML = `
+        <tr><td colspan="10">
+          <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <div class="empty-msg">Sin registros para este mes</div>
+          </div>
+        </td></tr>`;
+      tfoot.innerHTML = '';
+      return;
+    }
+
+    tbody.innerHTML = list.map(r => `
+      <tr>
+        <td>${fmtDate(r.fecha)}</td>
+        <td>
+          <span class="badge ${r.horario === 'SM 10:30' ? 'badge-am' : 'badge-pm'}">
+            ${r.horario}
+          </span>
+        </td>
+        <td><strong>${r.totalPax}</strong></td>
+        <td>
+          <span class="c-civ">${r.civitatis}</span>
+          <span class="sub"> ${euro(r.civitatisFee)}</span>
+        </td>
+        <td>
+          <span class="c-via">${r.viabam}</span>
+          <span class="sub"> ${euro(r.viabamFee)}</span>
+        </td>
+        <td>
+          <span class="c-web">${r.web}</span>
+          <span class="sub"> ${euro(r.webFee)}</span>
+        </td>
+        <td class="c-err"><strong>${euro(r.totalComm)}</strong></td>
+        <td>${euro(r.efectivo)}</td>
+        <td class="${r.netGain >= 0 ? 'c-ok' : 'c-err'}"><strong>${euro(r.netGain)}</strong></td>
+        <td>
+          <div class="td-actions">
+            <button class="btn btn-ghost btn-sm" onclick="openEdit(${r.id})">Editar</button>
+            <button class="btn btn-icon" onclick="deleteRecord(${r.id})" title="Eliminar">×</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+
+    const s = list.reduce((a, r) => {
+      a.pax  += r.totalPax;
+      a.comm += r.totalComm;
+      a.cash += r.efectivo;
+      a.net  += r.netGain;
+      return a;
+    }, { pax: 0, comm: 0, cash: 0, net: 0 });
+
+    tfoot.innerHTML = `
+      <tr>
+        <td colspan="2">TOTAL MES</td>
+        <td>${s.pax}</td>
+        <td colspan="3">—</td>
+        <td class="c-err">${euro(s.comm)}</td>
+        <td>${euro(s.cash)}</td>
+        <td class="${s.net >= 0 ? 'c-ok' : 'c-err'}">${euro(s.net)}</td>
+        <td></td>
+      </tr>
+    `;
+  }
+
+  /* ────────────────────────── Edit ───────────────────── */
+  function openEdit(id) {
+    const r = records.find(x => x.id === id);
+    if (!r) return;
+    editingId = id;
+
+    document.getElementById('e-fecha').value   = r.fecha;
+    document.getElementById('e-horario').value = r.horario;
+    document.getElementById('e-civ').value     = r.civitatis;
+    document.getElementById('e-via').value     = r.viabam;
+    document.getElementById('e-web').value     = r.web;
+    document.getElementById('e-cash').value    = r.efectivo;
+
+    document.getElementById('overlay').classList.add('open');
+  }
+
+  function saveEdit() {
+    const idx = records.findIndex(x => x.id === editingId);
+    if (idx === -1) return;
+
+    const fecha   = document.getElementById('e-fecha').value;
+    const horario = document.getElementById('e-horario').value;
+    const civ     = parseInt(document.getElementById('e-civ').value)  || 0;
+    const via     = parseInt(document.getElementById('e-via').value)  || 0;
+    const web     = parseInt(document.getElementById('e-web').value)  || 0;
+    const cash    = parseFloat(document.getElementById('e-cash').value) || 0;
+
+    const c = compute(civ, via, web, cash);
+
+    records[idx] = {
+      id: editingId,
+      fecha, horario,
+      civitatis: civ, viabam: via, web,
+      efectivo: cash,
+      ...c
+    };
+
+    sortRecords();
+    persist();
+    closeModal();
+    renderHistory();
+    toast('Registro actualizado');
+  }
+
+  function closeModal() {
+    document.getElementById('overlay').classList.remove('open');
+    editingId = null;
+  }
+
+  function onOverlayClick(e) {
+    if (e.target === document.getElementById('overlay')) closeModal();
+  }
+
+  /* ────────────────────────── Delete ─────────────────── */
+  function deleteRecord(id) {
+    if (!confirm('¿Eliminar este registro?')) return;
+    records = records.filter(r => r.id !== id);
+    persist();
+    renderHistory();
+    toast('Registro eliminado', 'warn');
+  }
+
+  /* ────────────────────────── CSV Export ─────────────── */
+  function exportCSV() {
+    const pfx      = `${curYear}-${String(curMonth + 1).padStart(2, '0')}`;
+    const filtered = records.filter(r => r.fecha.startsWith(pfx));
+
+    if (!filtered.length) { toast('No hay datos este mes', 'warn'); return; }
+
+    const heads = [
+      'Fecha','Horario','PAX Total',
+      'Civitatis PAX','Civitatis €',
+      'Viabam PAX','Viabam €',
+      'Web PAX','Web €',
+      'Total Comisiones','Efectivo','Ganancia Neta'
+    ];
+
+    const rows = filtered.map(r => [
+      r.fecha, r.horario, r.totalPax,
+      r.civitatis,  r.civitatisFee.toFixed(2),
+      r.viabam,     r.viabamFee.toFixed(2),
+      r.web,        r.webFee.toFixed(2),
+      r.totalComm.toFixed(2),
+      r.efectivo.toFixed(2),
+      r.netGain.toFixed(2)
+    ]);
+
+    const csv  = [heads, ...rows].map(r => r.join(';')).join('\r\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `itaka_comisiones_${pfx}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('CSV exportado');
+  }
+
+  /* ────────────────────────── Navigation ─────────────── */
+  function switchView(name) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`view-${name}`).classList.add('active');
+    document.querySelector(`.nav-btn[onclick="switchView('${name}')"]`).classList.add('active');
+    if (name === 'historial') renderHistory();
+  }
+
+  /* ────────────────────────── Toast ──────────────────── */
+  function toast(msg, type = 'ok') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.style.background =
+      type === 'err'  ? 'var(--danger)'  :
+      type === 'warn' ? 'var(--warning)' :
+      'var(--success)';
+    el.classList.add('show');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), 2600);
+  }
+
+  /* ────────────────────────── Boot ───────────────────── */
+  init();
+</script>
+</body>
+</html>
