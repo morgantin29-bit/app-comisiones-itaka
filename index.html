@@ -907,14 +907,6 @@
   const col = db.collection('registros');
 
   // Offline persistence: la app funciona sin internet
-  db.enablePersistence({ synchronizeTabs: true }).catch(err => {
-    if (err.code === 'failed-precondition') {
-      console.warn('Persistencia offline: solo una pestaña a la vez.');
-    } else if (err.code === 'unimplemented') {
-      console.warn('El navegador no soporta persistencia offline.');
-    }
-  });
-
   /* ────────────────────────── Constants ──────────────── */
   const RATES  = { civitatis: 3, viabam: 2.5, web: 2 };
   const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
@@ -943,6 +935,13 @@
     }, err => {
       console.error('Firestore error:', err);
       setSyncBadge('offline', 'Sin conexión');
+    });
+
+    // Persistencia offline (registrada después del listener para no bloquear la conexión)
+    db.enablePersistence({ synchronizeTabs: true }).catch(err => {
+      if (err.code !== 'failed-precondition' && err.code !== 'unimplemented') {
+        console.warn('enablePersistence:', err.code);
+      }
     });
 
     // Detectar cambios de red
@@ -989,14 +988,14 @@
     const civFee  = civ * RATES.civitatis;
     const viaFee  = via * RATES.viabam;
     const webFee  = web * RATES.web;
-    const totComm = civFee + viaFee + webFee;
+    const totalComm = civFee + viaFee + webFee;
     return {
       totalPax:     civ + via + web,
       civitatisFee: civFee,
       viabamFee:    viaFee,
       webFee,
       totalComm,
-      netGain:      cash - totComm
+      netGain:      cash - totalComm
     };
   }
 
