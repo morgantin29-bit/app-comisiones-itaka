@@ -2,7 +2,7 @@
 
 ## Qué es esta app
 
-Herramienta personal para registrar y calcular comisiones de tours diarios (Santa María). Cada día se hacen 1 o 2 tours en horarios fijos; por cada tour se registra cuántos pasajeros vinieron de cada plataforma y el efectivo recibido. La app calcula automáticamente las comisiones y la ganancia neta.
+Herramienta personal para registrar y calcular comisiones de tours diarios (Santa María). Cada día se hacen 1 o 2 tours en horarios fijos; por cada tour se registra cuántos pasajeros vinieron de cada plataforma y los cobros recibidos (Efectivo, Revolut, Sumup). La app calcula automáticamente las comisiones y la ganancia neta.
 
 ---
 
@@ -28,10 +28,23 @@ Herramienta personal para registrar y calcular comisiones de tours diarios (Sant
 
 ---
 
+## Acceso
+
+La app está protegida por un **PIN numérico de 4 dígitos: `1680`**.
+
+- Al entrar se muestra una pantalla de PIN; sin el PIN correcto no se ve nada.
+- El PIN queda guardado en `localStorage` — en el mismo dispositivo no hay que volver a ingresarlo.
+- El botón **Salir** en el header borra el PIN del localStorage y vuelve a la pantalla de PIN.
+- No hay autenticación de servidor (Firebase Auth no se usa). La protección es solo client-side, adecuada para uso personal.
+
+> **Nota:** Se intentó implementar Google Login con Firebase Authentication pero se descartó por problemas irresolubles con la API key (`auth/api-key-not-valid`). Se reemplazó por PIN simple.
+
+---
+
 ## Firebase
 
 - **Proyecto:** `app-comisiones-itaka`
-- **SDK:** Firebase compat v10.14.1 (cargado desde `www.gstatic.com`)
+- **SDK:** Firebase compat v10.14.1 (cargado desde `www.gstatic.com`) — solo Firestore, sin Auth
 - **Colección Firestore:** `registros`
 - **ID de documento:** timestamp Unix (`Date.now()`) convertido a string
 - **Listener:** `onSnapshot` en tiempo real — cualquier cambio en Firestore actualiza la UI en todos los dispositivos sin recargar
@@ -41,7 +54,7 @@ Herramienta personal para registrar y calcular comisiones de tours diarios (Sant
 ```
 allow read, write: if true;
 ```
-(uso personal, sin autenticación)
+(uso personal, acceso controlado solo por PIN en el frontend)
 
 ---
 
@@ -76,32 +89,33 @@ Si se agrega un archivo `_headers` en la raíz, Cloudflare Pages lo usa para def
 - Comisión Viabam = PAX × €2.50
 - Comisión Web = PAX × €2
 - Total comisiones = suma de las tres
-- Ganancia neta = Efectivo recibido − Total comisiones
+- Total cobros = Efectivo + Revolut + Sumup
+- Ganancia neta = Total cobros − Total comisiones
 
 ---
 
 ## Funcionalidades implementadas
 
 ### Vista Registrar
-- Formulario con: fecha (default hoy), horario (selector), PAX por origen, efectivo recibido
+- Formulario con: fecha (default hoy), horario (selector), PAX por origen, cobros recibidos (tres campos: Efectivo / Revolut / Sumup)
 - Preview en tiempo real de todos los cálculos mientras se tipea
 - Guardar en Firestore con un click
 - Limpiar formulario
 
 ### Vista Historial — modo "Por mes"
 - Navegación mes a mes con flechas
-- 5 tarjetas de resumen del mes: tours, PAX total, comisiones, efectivo, ganancia neta
-- Tabla completa con todos los registros del mes
+- 5 tarjetas de resumen del mes: tours, PAX total, comisiones, cobros totales, ganancia neta
+- Tabla completa con todos los registros del mes — columna "Cobros" muestra total; si hay Revolut o Sumup, muestra desglose en sub-línea (Ef / Rv / Su)
 - Fila de totales al pie de la tabla
-- Editar cualquier registro (modal slide-up en móvil)
+- Editar cualquier registro (modal slide-up en móvil) — incluye los tres campos de cobro
 - Eliminar registro con confirmación
-- Exportar CSV del mes (con BOM UTF-8, separador `;`, compatible con Excel)
+- Exportar CSV del mes (con BOM UTF-8, separador `;`, compatible con Excel) — incluye columnas Efectivo, Revolut, Sumup y Total Cobros
 
 ### Vista Historial — modo "Por período"
 - Filtro libre por rango de fechas (desde / hasta), independiente del mes calendario
-- Resumen del período con 6 tarjetas: comisiones Civitatis, Viabam, Web, total comisiones, efectivo, ganancia neta
+- Resumen del período con 9 tarjetas: Civitatis, Viabam, Web, Total comisiones, Efectivo, Revolut, Sumup, Total cobros, Ganancia neta
 - Tabla detallada del período con totales al pie
-- Exportar CSV del período (nombre de archivo incluye fechas del rango)
+- Exportar CSV del período (nombre de archivo incluye fechas del rango) — mismas columnas extendidas
 
 ### Indicador de sincronización (header)
 | Estado | Color | Cuándo |
@@ -130,15 +144,20 @@ Si se agrega un archivo `_headers` en la raíz, Cloudflare Pages lo usa para def
   civitatis:    5,               // PAX
   viabam:       3,               // PAX
   web:          2,               // PAX
-  efectivo:     120.00,
+  efectivo:     80.00,           // cobro en efectivo
+  revolut:      30.00,           // cobro por Revolut
+  sumup:        10.00,           // cobro por Sumup
+  totalCash:    120.00,          // efectivo + revolut + sumup
   totalPax:     10,
   civitatisFee: 15.00,
   viabamFee:    7.50,
   webFee:       4.00,
   totalComm:    26.50,
-  netGain:      93.50
+  netGain:      93.50            // totalCash - totalComm
 }
 ```
+
+**Compatibilidad hacia atrás:** registros anteriores no tienen `revolut`, `sumup` ni `totalCash`. El helper `getTotalCash(r)` detecta esto y usa `r.efectivo` directamente.
 
 ---
 
@@ -150,3 +169,4 @@ Si se agrega un archivo `_headers` en la raíz, Cloudflare Pages lo usa para def
 - **`enablePersistence` se registra después del listener:** evita que un fallo de persistencia bloquee la conexión inicial a Firestore
 - **IDs como `Date.now()`:** simple y suficiente para uso personal de un solo usuario; no hay riesgo de colisión
 - **CSV con BOM UTF-8 y separador `;`:** necesario para que Excel en español abra el archivo correctamente sin configuración adicional
+- **PIN en localStorage:** la sesión queda recordada indefinidamente en el dispositivo; el botón Salir la borra manualmente
