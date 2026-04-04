@@ -1069,10 +1069,8 @@
     const provider = new firebase.auth.GoogleAuthProvider();
     showLoginError('');
     auth.signInWithPopup(provider).catch(err => {
-      if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
-        showLoginError('Error al iniciar sesión. Intentá de nuevo.');
-        console.error(err);
-      }
+      showLoginError(err.code + ': ' + err.message);
+      console.error(err);
     });
   }
 
