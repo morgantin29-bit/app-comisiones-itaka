@@ -643,20 +643,124 @@
         text-align: center;
       }
     }
+
+    /* ── Login screen ────────────────────────────── */
+    #login-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 24px;
+    }
+
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+    }
+
+    .login-logo {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -.4px;
+      margin-bottom: 8px;
+    }
+    .login-logo em { color: var(--accent); font-style: normal; }
+
+    .login-subtitle {
+      font-size: 13.5px;
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+
+    .btn-google {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      background: #fff;
+      color: #1f1f1f;
+      border: none;
+      padding: 13px 20px;
+      border-radius: 9px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background .18s;
+      min-height: 48px;
+    }
+    .btn-google:hover { background: #f0f0f0; }
+    .btn-google svg { flex-shrink: 0; }
+
+    .login-error {
+      margin-top: 16px;
+      font-size: 12.5px;
+      color: var(--danger);
+      min-height: 18px;
+    }
+
+    /* Botón cerrar sesión en header */
+    .btn-signout {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 5px 12px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      font-family: inherit;
+      transition: all .18s;
+      white-space: nowrap;
+    }
+    .btn-signout:hover { border-color: var(--danger); color: var(--danger); }
+
+    @media (max-width: 640px) {
+      .login-card { padding: 32px 22px; }
+      .btn-signout { font-size: 11px; padding: 4px 9px; }
+    }
   </style>
 </head>
 <body>
 
-<header>
+<!-- ═══════════════ LOGIN SCREEN ════════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo"><em>Itaka</em> Comisiones</div>
+    <p class="login-subtitle">Iniciá sesión para continuar</p>
+    <button class="btn-google" onclick="signInWithGoogle()">
+      <svg width="18" height="18" viewBox="0 0 48 48">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+      </svg>
+      Continuar con Google
+    </button>
+    <p class="login-error" id="login-error"></p>
+  </div>
+</div>
+
+<header id="app-header" style="display:none">
   <div class="logo"><em>Itaka</em> Comisiones</div>
   <span id="sync-status" class="sync-pill sync-loading">Conectando…</span>
   <nav>
     <button class="nav-btn active" onclick="switchView('registro')">Registrar</button>
     <button class="nav-btn"        onclick="switchView('historial')">Historial</button>
   </nav>
+  <button class="btn-signout" onclick="cerrarSesion()" title="Cerrar sesión">Salir</button>
 </header>
 
-<main>
+<main id="app-main" style="display:none">
 
   <!-- ═══════════════ REGISTRO VIEW ═══════════════ -->
   <div id="view-registro" class="view active">
@@ -698,9 +802,22 @@
           </div>
         </div>
 
-        <div class="form-group">
-          <label>Efectivo recibido (€)</label>
-          <input type="number" id="efectivo" min="0" step="0.01" value="0" oninput="calcPreview()">
+        <div class="form-group full">
+          <label>Cobros recibidos (€)</label>
+          <div class="pax-row">
+            <div>
+              <div class="source-tag">Efectivo</div>
+              <input type="number" id="efectivo" min="0" step="0.01" value="0" oninput="calcPreview()">
+            </div>
+            <div>
+              <div class="source-tag">Revolut</div>
+              <input type="number" id="revolut" min="0" step="0.01" value="0" oninput="calcPreview()">
+            </div>
+            <div>
+              <div class="source-tag">Sumup</div>
+              <input type="number" id="sumup" min="0" step="0.01" value="0" oninput="calcPreview()">
+            </div>
+          </div>
         </div>
 
       </div>
@@ -733,7 +850,7 @@
             <div class="total-val c-err" id="pv-comm">€0</div>
           </div>
           <div class="total-block">
-            <div class="total-lbl">Efectivo</div>
+            <div class="total-lbl">Cobros</div>
             <div class="total-val" id="pv-cash">€0</div>
           </div>
           <div class="total-block">
@@ -779,7 +896,7 @@
             <tr>
               <th>Fecha</th><th>Horario</th><th>PAX</th>
               <th>Civitatis</th><th>Viabam</th><th>Web</th>
-              <th>Comisiones</th><th>Efectivo</th><th>Neta</th><th></th>
+              <th>Comisiones</th><th>Cobros</th><th>Neta</th><th></th>
             </tr>
           </thead>
           <tbody id="hist-body"></tbody>
@@ -822,7 +939,7 @@
               <tr>
                 <th>Fecha</th><th>Horario</th><th>PAX</th>
                 <th>Civitatis</th><th>Viabam</th><th>Web</th>
-                <th>Comisiones</th><th>Efectivo</th><th>Neta</th>
+                <th>Comisiones</th><th>Cobros</th><th>Neta</th>
               </tr>
             </thead>
             <tbody id="periodo-body"></tbody>
@@ -874,9 +991,22 @@
           </div>
         </div>
       </div>
-      <div class="form-group">
-        <label>Efectivo recibido (€)</label>
-        <input type="number" id="e-cash" min="0" step="0.01" value="0">
+      <div class="form-group full">
+        <label>Cobros recibidos (€)</label>
+        <div class="pax-row">
+          <div>
+            <div class="source-tag">Efectivo</div>
+            <input type="number" id="e-cash" min="0" step="0.01" value="0">
+          </div>
+          <div>
+            <div class="source-tag">Revolut</div>
+            <input type="number" id="e-revolut" min="0" step="0.01" value="0">
+          </div>
+          <div>
+            <div class="source-tag">Sumup</div>
+            <input type="number" id="e-sumup" min="0" step="0.01" value="0">
+          </div>
+        </div>
       </div>
     </div>
     <div class="form-actions">
@@ -890,6 +1020,7 @@
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
 <script>
@@ -903,8 +1034,55 @@
     appId:             "1:314198050943:web:ea70b85f38c354a87a574a"
   });
 
-  const db  = firebase.firestore();
-  const col = db.collection('registros');
+  const db   = firebase.firestore();
+  const col  = db.collection('registros');
+  const auth = firebase.auth();
+
+  /* ────────────────────────── Auth ───────────────────── */
+  // ⚠️ Reemplazá este email por el tuyo de Google
+  const AUTHORIZED_EMAIL = 'morgantin29@gmail.com';
+
+  let appInitialized = false;
+
+  auth.onAuthStateChanged(user => {
+    if (user && user.email === AUTHORIZED_EMAIL) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app-header').style.display   = '';
+      document.getElementById('app-main').style.display     = '';
+      if (!appInitialized) {
+        appInitialized = true;
+        init();
+      }
+    } else {
+      if (user) {
+        // Cuenta no autorizada: cerrar sesión automáticamente
+        auth.signOut();
+        showLoginError('Esa cuenta no tiene acceso. Usá la cuenta autorizada.');
+      }
+      document.getElementById('login-screen').style.display = '';
+      document.getElementById('app-header').style.display   = 'none';
+      document.getElementById('app-main').style.display     = 'none';
+    }
+  });
+
+  function signInWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    showLoginError('');
+    auth.signInWithPopup(provider).catch(err => {
+      if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
+        showLoginError('Error al iniciar sesión. Intentá de nuevo.');
+        console.error(err);
+      }
+    });
+  }
+
+  function cerrarSesion() {
+    auth.signOut();
+  }
+
+  function showLoginError(msg) {
+    document.getElementById('login-error').textContent = msg;
+  }
 
   // Offline persistence: la app funciona sin internet
   /* ────────────────────────── Constants ──────────────── */
@@ -978,6 +1156,12 @@
     return '€' + Math.abs(v).toFixed(2).replace('.', ',');
   }
 
+  // Compatibilidad: registros antiguos sólo tienen `efectivo`
+  function getTotalCash(r) {
+    if (r.totalCash !== undefined) return r.totalCash;
+    return r.efectivo || 0;
+  }
+
   function sortRecords() {
     records.sort((a, b) =>
       a.fecha.localeCompare(b.fecha) || a.horario.localeCompare(b.horario));
@@ -1004,7 +1188,7 @@
     const civ  = int('civitatis');
     const via  = int('viabam');
     const web  = int('web');
-    const cash = flt('efectivo');
+    const cash = flt('efectivo') + flt('revolut') + flt('sumup');
     const c    = compute(civ, via, web, cash);
 
     setText('pv-pax',  c.totalPax);
@@ -1025,12 +1209,15 @@
 
   /* ────────────────────────── Save new ───────────────── */
   async function guardarRegistro() {
-    const fecha   = document.getElementById('fecha').value;
-    const horario = document.getElementById('horario').value;
-    const civ     = int('civitatis');
-    const via     = int('viabam');
-    const web     = int('web');
-    const cash    = flt('efectivo');
+    const fecha    = document.getElementById('fecha').value;
+    const horario  = document.getElementById('horario').value;
+    const civ      = int('civitatis');
+    const via      = int('viabam');
+    const web      = int('web');
+    const efectivo = flt('efectivo');
+    const revolut  = flt('revolut');
+    const sumup    = flt('sumup');
+    const cash     = efectivo + revolut + sumup;
 
     if (!fecha) { toast('Selecciona una fecha', 'err'); return; }
 
@@ -1038,7 +1225,7 @@
     const record = {
       id, fecha, horario,
       civitatis: civ, viabam: via, web,
-      efectivo: cash,
+      efectivo, revolut, sumup, totalCash: cash,
       ...compute(civ, via, web, cash)
     };
 
@@ -1059,6 +1246,8 @@
     document.getElementById('viabam').value    = 0;
     document.getElementById('web').value       = 0;
     document.getElementById('efectivo').value  = 0;
+    document.getElementById('revolut').value   = 0;
+    document.getElementById('sumup').value     = 0;
     calcPreview();
   }
 
@@ -1085,7 +1274,7 @@
       a.tours++;
       a.pax  += r.totalPax;
       a.comm += r.totalComm;
-      a.cash += r.efectivo;
+      a.cash += getTotalCash(r);
       a.net  += r.netGain;
       return a;
     }, { tours: 0, pax: 0, comm: 0, cash: 0, net: 0 });
@@ -1152,7 +1341,10 @@
           <span class="sub"> ${euro(r.webFee)}</span>
         </td>
         <td class="c-err"><strong>${euro(r.totalComm)}</strong></td>
-        <td>${euro(r.efectivo)}</td>
+        <td>
+          ${euro(getTotalCash(r))}
+          ${(r.revolut || r.sumup) ? `<br><span class="sub">Ef ${euro(r.efectivo||0)} · Rv ${euro(r.revolut||0)} · Su ${euro(r.sumup||0)}</span>` : ''}
+        </td>
         <td class="${r.netGain >= 0 ? 'c-ok' : 'c-err'}"><strong>${euro(r.netGain)}</strong></td>
         <td>
           <div class="td-actions">
@@ -1166,7 +1358,7 @@
     const s = list.reduce((a, r) => {
       a.pax  += r.totalPax;
       a.comm += r.totalComm;
-      a.cash += r.efectivo;
+      a.cash += getTotalCash(r);
       a.net  += r.netGain;
       return a;
     }, { pax: 0, comm: 0, cash: 0, net: 0 });
@@ -1195,24 +1387,29 @@
     document.getElementById('e-civ').value     = r.civitatis;
     document.getElementById('e-via').value     = r.viabam;
     document.getElementById('e-web').value     = r.web;
-    document.getElementById('e-cash').value    = r.efectivo;
+    document.getElementById('e-cash').value    = r.efectivo || 0;
+    document.getElementById('e-revolut').value = r.revolut  || 0;
+    document.getElementById('e-sumup').value   = r.sumup    || 0;
 
     document.getElementById('overlay').classList.add('open');
   }
 
   async function saveEdit() {
-    const fecha   = document.getElementById('e-fecha').value;
-    const horario = document.getElementById('e-horario').value;
-    const civ     = parseInt(document.getElementById('e-civ').value)    || 0;
-    const via     = parseInt(document.getElementById('e-via').value)    || 0;
-    const web     = parseInt(document.getElementById('e-web').value)    || 0;
-    const cash    = parseFloat(document.getElementById('e-cash').value) || 0;
+    const fecha    = document.getElementById('e-fecha').value;
+    const horario  = document.getElementById('e-horario').value;
+    const civ      = parseInt(document.getElementById('e-civ').value)       || 0;
+    const via      = parseInt(document.getElementById('e-via').value)       || 0;
+    const web      = parseInt(document.getElementById('e-web').value)       || 0;
+    const efectivo = parseFloat(document.getElementById('e-cash').value)    || 0;
+    const revolut  = parseFloat(document.getElementById('e-revolut').value) || 0;
+    const sumup    = parseFloat(document.getElementById('e-sumup').value)   || 0;
+    const cash     = efectivo + revolut + sumup;
 
     const updated = {
       id: editingId,
       fecha, horario,
       civitatis: civ, viabam: via, web,
-      efectivo: cash,
+      efectivo, revolut, sumup, totalCash: cash,
       ...compute(civ, via, web, cash)
     };
 
@@ -1259,7 +1456,7 @@
       'Civitatis PAX','Civitatis €',
       'Viabam PAX','Viabam €',
       'Web PAX','Web €',
-      'Total Comisiones','Efectivo','Ganancia Neta'
+      'Total Comisiones','Efectivo','Revolut','Sumup','Total Cobros','Ganancia Neta'
     ];
 
     const rows = filtered.map(r => [
@@ -1268,7 +1465,10 @@
       r.viabam,     r.viabamFee.toFixed(2),
       r.web,        r.webFee.toFixed(2),
       r.totalComm.toFixed(2),
-      r.efectivo.toFixed(2),
+      (r.efectivo||0).toFixed(2),
+      (r.revolut||0).toFixed(2),
+      (r.sumup||0).toFixed(2),
+      getTotalCash(r).toFixed(2),
       r.netGain.toFixed(2)
     ]);
 
@@ -1316,14 +1516,17 @@
 
     // Breakdown por origen
     const s = list.reduce((a, r) => {
-      a.civComm += r.civitatisFee;
-      a.viaComm += r.viabamFee;
-      a.webComm += r.webFee;
-      a.total   += r.totalComm;
-      a.cash    += r.efectivo;
-      a.net     += r.netGain;
+      a.civComm  += r.civitatisFee;
+      a.viaComm  += r.viabamFee;
+      a.webComm  += r.webFee;
+      a.total    += r.totalComm;
+      a.efectivo += (r.efectivo || 0);
+      a.revolut  += (r.revolut  || 0);
+      a.sumup    += (r.sumup    || 0);
+      a.cash     += getTotalCash(r);
+      a.net      += r.netGain;
       return a;
-    }, { civComm: 0, viaComm: 0, webComm: 0, total: 0, cash: 0, net: 0 });
+    }, { civComm: 0, viaComm: 0, webComm: 0, total: 0, efectivo: 0, revolut: 0, sumup: 0, cash: 0, net: 0 });
 
     document.getElementById('breakdown-grid').innerHTML = `
       <div class="breakdown-card">
@@ -1343,8 +1546,20 @@
         <div class="breakdown-lbl">Total comisiones</div>
       </div>
       <div class="breakdown-card">
-        <div class="breakdown-val">${euro(s.cash)}</div>
+        <div class="breakdown-val">${euro(s.efectivo)}</div>
         <div class="breakdown-lbl">Efectivo</div>
+      </div>
+      <div class="breakdown-card">
+        <div class="breakdown-val">${euro(s.revolut)}</div>
+        <div class="breakdown-lbl">Revolut</div>
+      </div>
+      <div class="breakdown-card">
+        <div class="breakdown-val">${euro(s.sumup)}</div>
+        <div class="breakdown-lbl">Sumup</div>
+      </div>
+      <div class="breakdown-card">
+        <div class="breakdown-val">${euro(s.cash)}</div>
+        <div class="breakdown-lbl">Total cobros</div>
       </div>
       <div class="breakdown-card">
         <div class="breakdown-val ${s.net >= 0 ? 'c-ok' : 'c-err'}">${euro(s.net)}</div>
@@ -1377,7 +1592,10 @@
         <td><span class="c-via">${r.viabam}</span> <span class="sub">${euro(r.viabamFee)}</span></td>
         <td><span class="c-web">${r.web}</span> <span class="sub">${euro(r.webFee)}</span></td>
         <td class="c-err"><strong>${euro(r.totalComm)}</strong></td>
-        <td>${euro(r.efectivo)}</td>
+        <td>
+          ${euro(getTotalCash(r))}
+          ${(r.revolut || r.sumup) ? `<br><span class="sub">Ef ${euro(r.efectivo||0)} · Rv ${euro(r.revolut||0)} · Su ${euro(r.sumup||0)}</span>` : ''}
+        </td>
         <td class="${r.netGain >= 0 ? 'c-ok' : 'c-err'}"><strong>${euro(r.netGain)}</strong></td>
       </tr>
     `).join('');
@@ -1406,7 +1624,7 @@
       'Civitatis PAX','Civitatis €',
       'Viabam PAX','Viabam €',
       'Web PAX','Web €',
-      'Total Comisiones','Efectivo','Ganancia Neta'
+      'Total Comisiones','Efectivo','Revolut','Sumup','Total Cobros','Ganancia Neta'
     ];
 
     const rows = periodoFiltered.map(r => [
@@ -1415,7 +1633,10 @@
       r.viabam,     r.viabamFee.toFixed(2),
       r.web,        r.webFee.toFixed(2),
       r.totalComm.toFixed(2),
-      r.efectivo.toFixed(2),
+      (r.efectivo||0).toFixed(2),
+      (r.revolut||0).toFixed(2),
+      (r.sumup||0).toFixed(2),
+      getTotalCash(r).toFixed(2),
       r.netGain.toFixed(2)
     ]);
 
@@ -1453,7 +1674,7 @@
   }
 
   /* ────────────────────────── Boot ───────────────────── */
-  init();
+  // La app arranca desde onAuthStateChanged (ver sección Auth)
 </script>
 </body>
 </html>
