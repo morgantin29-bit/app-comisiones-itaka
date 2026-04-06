@@ -1032,7 +1032,8 @@
         'auth/invalid-credential': 'Email o contraseña incorrectos.',
         'auth/too-many-requests':  'Demasiados intentos. Intentá más tarde.',
       };
-      errEl.textContent = msgs[err.code] || 'Error al iniciar sesión.';
+      console.error('Auth error:', err.code, err.message);
+      errEl.textContent = msgs[err.code] || `Error: ${err.code}`;
       btn.disabled    = false;
       btn.textContent = 'Entrar';
     }
