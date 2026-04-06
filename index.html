@@ -1018,17 +1018,7 @@
 
 <script>
   /* ────────────────────────── Firebase ──────────────── */
-  firebase.initializeApp({
-    apiKey:            "AIzaSyBrbu0_FdLuDz9NB-e5awXwP0zYwjgLOfM",
-    authDomain:        "app-comisiones-itaka.firebaseapp.com",
-    projectId:         "app-comisiones-itaka",
-    storageBucket:     "app-comisiones-itaka.firebasestorage.app",
-    messagingSenderId: "314198050943",
-    appId:             "1:314198050943:web:ea70b85f38c354a87a574a"
-  });
-
-  const db  = firebase.firestore();
-  const col = db.collection('registros');
+  let db, col;
 
   /* ────────────────────────── PIN Auth ───────────────── */
   const CORRECT_PIN = '1680';
@@ -1658,7 +1648,16 @@
   }
 
   /* ────────────────────────── Boot ───────────────────── */
-  checkPin();
+  async function initApp() {
+    const res    = await fetch('/firebase-config');
+    const config = await res.json();
+    firebase.initializeApp(config);
+    db  = firebase.firestore();
+    col = db.collection('registros');
+    checkPin();
+  }
+
+  initApp();
 </script>
 </body>
 </html>
