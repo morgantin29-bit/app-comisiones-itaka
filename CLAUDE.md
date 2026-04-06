@@ -50,6 +50,18 @@ La app está protegida por un **PIN numérico de 4 dígitos: `1680`**.
 - **Listener:** `onSnapshot` en tiempo real — cualquier cambio en Firestore actualiza la UI en todos los dispositivos sin recargar
 - **Persistencia offline:** `db.enablePersistence({ synchronizeTabs: true })` — la app funciona sin internet y sincroniza al reconectar
 
+### Configuración de claves (desde 2026-04-06)
+
+Las claves de Firebase **ya no están hardcodeadas** en `index.html`. Al iniciar, la app hace un `fetch('/firebase-config')` que llama a la Cloudflare Pages Function `functions/firebase-config.js`, la cual lee las claves desde las variables de entorno del proyecto en Cloudflare y las devuelve como JSON.
+
+Variables de entorno requeridas en Cloudflare Pages:
+- `FIREBASE_API_KEY`
+- `FIREBASE_AUTH_DOMAIN`
+- `FIREBASE_PROJECT_ID`
+- `FIREBASE_STORAGE_BUCKET`
+- `FIREBASE_MESSAGING_SENDER_ID`
+- `FIREBASE_APP_ID`
+
 ### Reglas de Firestore actuales
 ```
 allow read, write: if true;
@@ -62,8 +74,10 @@ allow read, write: if true;
 
 ```
 Appcomisiones-itaka/
-├── index.html      # Toda la app (HTML + CSS + JS)
-└── CLAUDE.md       # Este archivo
+├── index.html                    # Toda la app (HTML + CSS + JS)
+├── functions/
+│   └── firebase-config.js        # Cloudflare Pages Function — sirve la config de Firebase desde env vars
+└── CLAUDE.md                     # Este archivo
 ```
 
 Si se agrega un archivo `_headers` en la raíz, Cloudflare Pages lo usa para definir cabeceras HTTP (necesario si hay problemas de CSP con el CDN de Firebase).
@@ -163,10 +177,24 @@ Si se agrega un archivo `_headers` en la raíz, Cloudflare Pages lo usa para def
 
 ## Decisiones técnicas relevantes
 
-- **Un solo archivo:** facilita el deploy en Cloudflare Pages sin configuración de build
+- **Claves Firebase en env vars (no hardcodeadas):** `functions/firebase-config.js` es una Cloudflare Pages Function que sirve la config vía `GET /firebase-config`; el frontend la fetchea al arrancar antes de inicializar Firebase. Evita exponer claves en el código fuente público
+- **Un solo archivo principal:** facilita el deploy en Cloudflare Pages sin configuración de build
 - **SDK compat (no modular):** más simple para un archivo sin bundler; la diferencia de tamaño no importa en este contexto
 - **`onSnapshot` como única fuente de verdad:** todas las escrituras (add/edit/delete) van a Firestore y el listener se encarga de actualizar la UI; no hay estado local que gestionar manualmente
 - **`enablePersistence` se registra después del listener:** evita que un fallo de persistencia bloquee la conexión inicial a Firestore
 - **IDs como `Date.now()`:** simple y suficiente para uso personal de un solo usuario; no hay riesgo de colisión
 - **CSV con BOM UTF-8 y separador `;`:** necesario para que Excel en español abra el archivo correctamente sin configuración adicional
 - **PIN en localStorage:** la sesión queda recordada indefinidamente en el dispositivo; el botón Salir la borra manualmente
+
+---
+
+## Historial de versiones
+
+### v1.0 — 06/04/2026
+- Versión inicial estable con registro de tours, historial, exportación CSV y PIN de acceso
+- Firebase Firestore como base de datos
+- Deploy en Cloudflare Pages
+
+### v1.1 — 06/04/2026
+- Claves de Firebase movidas a variables de entorno de Cloudflare
+- Agregada función `functions/firebase-config.js` para cargar config de forma segura
