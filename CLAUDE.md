@@ -30,21 +30,21 @@ Herramienta personal para registrar y calcular comisiones de tours diarios (Sant
 
 ## Acceso
 
-La app está protegida por un **PIN numérico de 4 dígitos: `1680`**.
+La app está protegida por **Firebase Authentication (email/password)**.
 
-- Al entrar se muestra una pantalla de PIN; sin el PIN correcto no se ve nada.
-- El PIN queda guardado en `localStorage` — en el mismo dispositivo no hay que volver a ingresarlo.
-- El botón **Salir** en el header borra el PIN del localStorage y vuelve a la pantalla de PIN.
-- No hay autenticación de servidor (Firebase Auth no se usa). La protección es solo client-side, adecuada para uso personal.
+- Al entrar se muestra una pantalla de login con email y contraseña.
+- Firebase mantiene la sesión activa automáticamente — no hay que volver a loguearse en el mismo dispositivo.
+- El botón **Salir** en el header llama a `firebase.auth().signOut()` y vuelve al login.
+- `onAuthStateChanged` controla la visibilidad de la app — si no hay sesión activa, solo se ve el login.
 
-> **Nota:** Se intentó implementar Google Login con Firebase Authentication pero se descartó por problemas irresolubles con la API key (`auth/api-key-not-valid`). Se reemplazó por PIN simple.
+> **Nota:** Google Login se descartó anteriormente por problemas con la API key. Email/password funciona correctamente. La API key que debe usarse en Cloudflare es la **"Browser key (auto created by Firebase)"** de Google Cloud → APIs & Services → Credenciales — no otra clave del proyecto.
 
 ---
 
 ## Firebase
 
 - **Proyecto:** `app-comisiones-itaka`
-- **SDK:** Firebase compat v10.14.1 (cargado desde `www.gstatic.com`) — solo Firestore, sin Auth
+- **SDK:** Firebase compat v10.14.1 (cargado desde `www.gstatic.com`) — Firestore + Auth (email/password)
 - **Colección Firestore:** `registros`
 - **ID de documento:** timestamp Unix (`Date.now()`) convertido a string
 - **Listener:** `onSnapshot` en tiempo real — cualquier cambio en Firestore actualiza la UI en todos los dispositivos sin recargar
@@ -64,9 +64,9 @@ Variables de entorno requeridas en Cloudflare Pages:
 
 ### Reglas de Firestore actuales
 ```
-allow read, write: if true;
+allow read, write: if request.auth != null;
 ```
-(uso personal, acceso controlado solo por PIN en el frontend)
+Solo usuarios autenticados con Firebase Auth pueden leer y escribir.
 
 ---
 
@@ -184,7 +184,7 @@ Si se agrega un archivo `_headers` en la raíz, Cloudflare Pages lo usa para def
 - **`enablePersistence` se registra después del listener:** evita que un fallo de persistencia bloquee la conexión inicial a Firestore
 - **IDs como `Date.now()`:** simple y suficiente para uso personal de un solo usuario; no hay riesgo de colisión
 - **CSV con BOM UTF-8 y separador `;`:** necesario para que Excel en español abra el archivo correctamente sin configuración adicional
-- **PIN en localStorage:** la sesión queda recordada indefinidamente en el dispositivo; el botón Salir la borra manualmente
+- **Firebase Auth email/password:** reemplazó al sistema de PIN. La sesión la gestiona Firebase automáticamente; `onAuthStateChanged` decide si mostrar el login o la app. `signOut()` cierra la sesión desde cualquier dispositivo
 
 ---
 
@@ -198,3 +198,8 @@ Si se agrega un archivo `_headers` en la raíz, Cloudflare Pages lo usa para def
 ### v1.1 — 06/04/2026
 - Claves de Firebase movidas a variables de entorno de Cloudflare
 - Agregada función `functions/firebase-config.js` para cargar config de forma segura
+
+### v1.2 — 06/04/2026
+- Reemplazado PIN por Firebase Authentication (email/password)
+- Reglas de Firestore actualizadas: `if request.auth != null` (base de datos ya no es pública)
+- Eliminado todo el código relacionado al PIN (`CORRECT_PIN`, `PIN_KEY`, localStorage)
