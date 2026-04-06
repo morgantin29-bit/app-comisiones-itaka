@@ -680,26 +680,6 @@
       margin-bottom: 32px;
     }
 
-    .pin-input {
-      width: 100%;
-      text-align: center;
-      font-size: 28px;
-      font-weight: 700;
-      letter-spacing: 12px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 14px 20px;
-      border-radius: 10px;
-      font-family: inherit;
-      outline: none;
-      margin-bottom: 14px;
-      -moz-appearance: textfield;
-      appearance: textfield;
-    }
-    .pin-input::-webkit-inner-spin-button { display: none; }
-    .pin-input:focus { border-color: var(--accent); }
-
     .login-error {
       margin-top: 4px;
       font-size: 12.5px;
@@ -731,15 +711,24 @@
 </head>
 <body>
 
-<!-- ═══════════════ PIN SCREEN ═════════════════ -->
+<!-- ═══════════════ LOGIN SCREEN ════════════════ -->
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo"><em>Itaka</em> Comisiones</div>
-    <p class="login-subtitle">Ingresá el PIN para continuar</p>
-    <input type="password" id="pin-input" class="pin-input" maxlength="4"
-           inputmode="numeric" placeholder="····"
-           onkeydown="if(event.key==='Enter') submitPin()">
-    <button class="btn btn-full" onclick="submitPin()">Entrar</button>
+    <p class="login-subtitle">Iniciá sesión para continuar</p>
+    <div style="text-align:left; display:flex; flex-direction:column; gap:14px; margin-bottom:18px">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="tu@email.com"
+               onkeydown="if(event.key==='Enter') submitLogin()">
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="login-password" placeholder="••••••••"
+               onkeydown="if(event.key==='Enter') submitLogin()">
+      </div>
+    </div>
+    <button class="btn btn-full" id="login-btn" onclick="submitLogin()">Entrar</button>
     <p class="login-error" id="login-error"></p>
   </div>
 </div>
@@ -1015,35 +1004,37 @@
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 
 <script>
   /* ────────────────────────── Firebase ──────────────── */
   let db, col;
 
-  /* ────────────────────────── PIN Auth ───────────────── */
-  const CORRECT_PIN = '1680';
-  const PIN_KEY     = 'itaka_pin_ok';
+  /* ────────────────────────── Auth ───────────────────── */
+  async function submitLogin() {
+    const email    = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const btn      = document.getElementById('login-btn');
+    const errEl    = document.getElementById('login-error');
 
-  function checkPin() {
-    if (localStorage.getItem(PIN_KEY) === 'true') {
-      showApp();
-    } else {
-      document.getElementById('login-screen').style.display = '';
-      document.getElementById('app-header').style.display   = 'none';
-      document.getElementById('app-main').style.display     = 'none';
-      setTimeout(() => document.getElementById('pin-input').focus(), 100);
-    }
-  }
+    errEl.textContent = '';
+    btn.disabled      = true;
+    btn.textContent   = 'Entrando…';
 
-  function submitPin() {
-    const entered = document.getElementById('pin-input').value;
-    if (entered === CORRECT_PIN) {
-      localStorage.setItem(PIN_KEY, 'true');
-      showApp();
-    } else {
-      document.getElementById('login-error').textContent = 'PIN incorrecto';
-      document.getElementById('pin-input').value = '';
-      document.getElementById('pin-input').focus();
+    try {
+      await firebase.auth().signInWithEmailAndPassword(email, password);
+      // onAuthStateChanged se encarga de llamar showApp()
+    } catch (err) {
+      const msgs = {
+        'auth/invalid-email':      'Email inválido.',
+        'auth/user-not-found':     'Usuario no encontrado.',
+        'auth/wrong-password':     'Contraseña incorrecta.',
+        'auth/invalid-credential': 'Email o contraseña incorrectos.',
+        'auth/too-many-requests':  'Demasiados intentos. Intentá más tarde.',
+      };
+      errEl.textContent = msgs[err.code] || 'Error al iniciar sesión.';
+      btn.disabled    = false;
+      btn.textContent = 'Entrar';
     }
   }
 
@@ -1055,8 +1046,7 @@
   }
 
   function cerrarSesion() {
-    localStorage.removeItem(PIN_KEY);
-    checkPin();
+    firebase.auth().signOut();
   }
 
   /* ────────────────────────── Constants ──────────────── */
@@ -1648,13 +1638,26 @@
   }
 
   /* ────────────────────────── Boot ───────────────────── */
+  let appInited = false;
+
   async function initApp() {
     const res    = await fetch('/firebase-config');
     const config = await res.json();
     firebase.initializeApp(config);
     db  = firebase.firestore();
     col = db.collection('registros');
-    checkPin();
+
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        if (!appInited) { appInited = true; showApp(); }
+      } else {
+        appInited = false;
+        document.getElementById('login-screen').style.display = '';
+        document.getElementById('app-header').style.display   = 'none';
+        document.getElementById('app-main').style.display     = 'none';
+        setTimeout(() => document.getElementById('login-email').focus(), 100);
+      }
+    });
   }
 
   initApp();
