@@ -24,6 +24,7 @@ let editingId      = null;
 let periodoFiltered = [];
 let appInited      = false;
 let unsubSnapshot  = null;
+let pendingUserName = '';
 
 /* ─────────────────────── Login / Register ───────────── */
 function showLoginPanel() {
@@ -67,6 +68,7 @@ async function submitLogin() {
 }
 
 async function submitRegister() {
+  const name     = document.getElementById('reg-name').value.trim();
   const email    = document.getElementById('reg-email').value.trim().toLowerCase();
   const password = document.getElementById('reg-password').value;
   const confirm  = document.getElementById('reg-confirm').value;
@@ -93,6 +95,7 @@ async function submitRegister() {
     }
 
     btn.textContent = 'Creando cuenta…';
+    pendingUserName = name;
     await firebase.auth().createUserWithEmailAndPassword(email, password);
     // onAuthStateChanged se encarga del resto
   } catch (err) {
@@ -130,7 +133,8 @@ async function loadUserConfig() {
       };
     } else {
       userConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
-      userConfig.userName = '';
+      userConfig.userName = pendingUserName;
+      pendingUserName = '';
       // Guardar config inicial para el usuario nuevo
       await db.collection('users').doc(currentUser.uid)
         .collection('config').doc('settings').set(userConfig);

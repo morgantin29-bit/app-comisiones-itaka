@@ -48,6 +48,11 @@
       <p class="login-subtitle">Creá tu cuenta</p>
       <div style="text-align:left; display:flex; flex-direction:column; gap:14px; margin-bottom:18px">
         <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" id="reg-name" placeholder="Ej: Julian" maxlength="30"
+                 onkeydown="if(event.key==='Enter') submitRegister()">
+        </div>
+        <div class="form-group">
           <label>Email</label>
           <input type="email" id="reg-email" placeholder="tu@email.com"
                  onkeydown="if(event.key==='Enter') submitRegister()">
