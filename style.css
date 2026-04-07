@@ -763,3 +763,14 @@ tfoot td {
   .config-col-labels.platforms { grid-template-columns: 1fr 80px 38px; }
   .config-item .cfg-rate { width: 80px; }
 }
+
+/* ═══════════════ LOADING SCREEN ══════════════ */
+#loading-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}

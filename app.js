@@ -856,6 +856,7 @@ async function initApp() {
   db = firebase.firestore();
 
   firebase.auth().onAuthStateChanged(async user => {
+    document.getElementById('loading-screen').style.display = 'none';
     if (user) {
       if (!appInited) {
         currentUser  = user;

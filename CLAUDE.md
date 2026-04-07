@@ -88,9 +88,9 @@ service cloud.firestore {
 
 ```
 Appcomisiones-itaka/
-├── index.html                 # Esqueleto HTML (~290 líneas)
-├── style.css                  # Todos los estilos (~765 líneas)
-├── app.js                     # Toda la lógica JS (~878 líneas)
+├── index.html                 # Esqueleto HTML (~295 líneas)
+├── style.css                  # Todos los estilos (~776 líneas)
+├── app.js                     # Toda la lógica JS (~879 líneas)
 ├── functions/
 │   └── firebase-config.js     # Cloudflare Pages Function — sirve config de Firebase
 └── CLAUDE.md
@@ -219,3 +219,9 @@ Gris (conectando) → Naranja (guardando) → Verde (sincronizado) → Rojo (sin
 - **Refactor estructural:** CSS y JS extraídos del `index.html` a `style.css` y `app.js`
 - `index.html` reducido de ~1935 líneas a ~290 (solo HTML)
 - Sin cambios en funcionalidad ni en el proceso de deploy
+
+### v1.5 — 07/04/2026
+- **Fix: eliminado parpadeo de login al recargar (F5)**
+- Agregado `#loading-screen` (fondo oscuro + logo) que se muestra mientras Firebase resuelve el auth state
+- `#login-screen` ahora inicia oculto; solo aparece cuando `onAuthStateChanged` confirma que no hay sesión activa
+- Sin cambios en funcionalidad
