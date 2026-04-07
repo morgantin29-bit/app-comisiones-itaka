@@ -2,7 +2,7 @@
 
 ## Qué es esta app
 
-Herramienta personal para registrar y calcular comisiones de tours diarios (Santa María). Cada día se hacen 1 o 2 tours en horarios fijos; por cada tour se registra cuántos pasajeros vinieron de cada plataforma y los cobros recibidos (Efectivo, Revolut, Sumup). La app calcula automáticamente las comisiones y la ganancia neta.
+Herramienta para que guías turísticos registren y calculen comisiones de tours diarios (Santa María). Cada guía tiene sus propios datos separados. Se registran pasajeros por plataforma de origen y cobros recibidos; la app calcula comisiones y ganancia neta automáticamente.
 
 ---
 
@@ -13,10 +13,10 @@ Herramienta personal para registrar y calcular comisiones de tours diarios (Sant
 | Frontend | HTML + CSS + JS vanilla — un único archivo `index.html` |
 | Base de datos | Firebase Firestore (SDK compat v10.14.1 vía CDN) |
 | Hosting | Cloudflare Pages |
-| Repositorio | GitHub |
+| Repositorio | GitHub (`morgantin29-bit/app-comisiones-itaka`) |
 | Fuente | Google Fonts (Inter) |
 
-**Sin framework, sin build step, sin bundler.** El deploy es directo: push a GitHub → Cloudflare Pages detecta el cambio y publica automáticamente.
+**Sin framework, sin build step, sin bundler.** Deploy directo: push a GitHub → Cloudflare Pages publica automáticamente.
 
 ---
 
@@ -24,49 +24,63 @@ Herramienta personal para registrar y calcular comisiones de tours diarios (Sant
 
 - **Producción:** https://app-comisiones-itaka.pages.dev
 - **Firebase Console:** https://console.firebase.google.com/project/app-comisiones-itaka
-- **Repositorio GitHub:** _(completar con la URL del repo)_
 
 ---
 
-## Acceso
+## Acceso y autenticación
 
-La app está protegida por **Firebase Authentication (email/password)**.
+- **Firebase Authentication (email/password)**
+- Login en pantalla inicial; Firebase mantiene la sesión activa automáticamente
+- **Registro controlado:** los nuevos usuarios solo pueden crear cuenta si su email está aprobado en la colección `approved_emails` de Firestore. Para aprobar un email: agregar un documento con ID = email en esa colección (campo `activo: "si"`)
+- `onAuthStateChanged` controla la visibilidad; `signOut()` cierra sesión
 
-- Al entrar se muestra una pantalla de login con email y contraseña.
-- Firebase mantiene la sesión activa automáticamente — no hay que volver a loguearse en el mismo dispositivo.
-- El botón **Salir** en el header llama a `firebase.auth().signOut()` y vuelve al login.
-- `onAuthStateChanged` controla la visibilidad de la app — si no hay sesión activa, solo se ve el login.
-
-> **Nota:** Google Login se descartó anteriormente por problemas con la API key. Email/password funciona correctamente. La API key que debe usarse en Cloudflare es la **"Browser key (auto created by Firebase)"** de Google Cloud → APIs & Services → Credenciales — no otra clave del proyecto.
+> **Nota:** La API key correcta para Cloudflare es la **"Browser key (auto created by Firebase)"** de Google Cloud → APIs & Services → Credenciales.
 
 ---
 
 ## Firebase
 
 - **Proyecto:** `app-comisiones-itaka`
-- **SDK:** Firebase compat v10.14.1 (cargado desde `www.gstatic.com`) — Firestore + Auth (email/password)
-- **Colección Firestore:** `registros`
-- **ID de documento:** timestamp Unix (`Date.now()`) convertido a string
-- **Listener:** `onSnapshot` en tiempo real — cualquier cambio en Firestore actualiza la UI en todos los dispositivos sin recargar
-- **Persistencia offline:** `db.enablePersistence({ synchronizeTabs: true })` — la app funciona sin internet y sincroniza al reconectar
+- **SDK:** Firebase compat v10.14.1 — Firestore + Auth
+- **Listener:** `onSnapshot` en tiempo real — actualiza la UI en todos los dispositivos sin recargar
+- **Persistencia offline:** `db.enablePersistence({ synchronizeTabs: true })`
 
-### Configuración de claves (desde 2026-04-06)
+### Claves de Firebase
 
-Las claves de Firebase **ya no están hardcodeadas** en `index.html`. Al iniciar, la app hace un `fetch('/firebase-config')` que llama a la Cloudflare Pages Function `functions/firebase-config.js`, la cual lee las claves desde las variables de entorno del proyecto en Cloudflare y las devuelve como JSON.
+No están hardcodeadas. Al iniciar, la app hace `fetch('/firebase-config')` → `functions/firebase-config.js` (Cloudflare Pages Function) → lee desde variables de entorno de Cloudflare.
 
-Variables de entorno requeridas en Cloudflare Pages:
-- `FIREBASE_API_KEY`
-- `FIREBASE_AUTH_DOMAIN`
-- `FIREBASE_PROJECT_ID`
-- `FIREBASE_STORAGE_BUCKET`
-- `FIREBASE_MESSAGING_SENDER_ID`
-- `FIREBASE_APP_ID`
+Variables de entorno requeridas: `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN`, `FIREBASE_PROJECT_ID`, `FIREBASE_STORAGE_BUCKET`, `FIREBASE_MESSAGING_SENDER_ID`, `FIREBASE_APP_ID`
 
-### Reglas de Firestore actuales
+### Estructura de Firestore
+
 ```
-allow read, write: if request.auth != null;
+approved_emails/
+  {email}              ← emails autorizados a registrarse
+
+users/
+  {uid}/
+    config/
+      settings         ← plataformas/tarifas y medios de pago del usuario
+    registros/
+      {timestamp}      ← registros de tours del usuario
 ```
-Solo usuarios autenticados con Firebase Auth pueden leer y escribir.
+
+### Reglas de Firestore
+
+```js
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /approved_emails/{email} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /users/{uid}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+  }
+}
+```
 
 ---
 
@@ -74,132 +88,127 @@ Solo usuarios autenticados con Firebase Auth pueden leer y escribir.
 
 ```
 Appcomisiones-itaka/
-├── index.html                    # Toda la app (HTML + CSS + JS)
+├── index.html                 # Toda la app (HTML + CSS + JS)
 ├── functions/
-│   └── firebase-config.js        # Cloudflare Pages Function — sirve la config de Firebase desde env vars
-└── CLAUDE.md                     # Este archivo
+│   └── firebase-config.js     # Cloudflare Pages Function — sirve config de Firebase
+└── CLAUDE.md
 ```
-
-Si se agrega un archivo `_headers` en la raíz, Cloudflare Pages lo usa para definir cabeceras HTTP (necesario si hay problemas de CSP con el CDN de Firebase).
 
 ---
 
 ## Lógica de negocio
 
 ### Horarios disponibles
-- SM 10:00
-- SM 10:30
-- SM 13:00
-- SM 13:30
+SM 10:00 / SM 10:30 / SM 13:00 / SM 13:30
 
-### Tarifas de comisión
-- **Civitatis:** €3 por pasajero
-- **Viabam:** €2.50 por pasajero
-- **Web:** €2 por pasajero
+### Tarifas y medios de pago
+**Completamente configurables por usuario** desde la pestaña Configuración. Defaults iniciales:
+- Plataformas: Civitatis €3/pax · Viabam €2.50/pax · Web €2/pax
+- Medios de pago: Efectivo · Revolut · Sumup
 
-### Cálculos automáticos por registro
-- Total PAX = Civitatis + Viabam + Web
-- Comisión Civitatis = PAX × €3
-- Comisión Viabam = PAX × €2.50
-- Comisión Web = PAX × €2
-- Total comisiones = suma de las tres
-- Total cobros = Efectivo + Revolut + Sumup
+### Cálculo por registro
+- Total PAX = suma de PAX por plataforma
+- Comisión por plataforma = PAX × tarifa configurada
 - Ganancia neta = Total cobros − Total comisiones
 
 ---
 
-## Funcionalidades implementadas
+## Funcionalidades
 
 ### Vista Registrar
-- Formulario con: fecha (default hoy), horario (selector), PAX por origen, cobros recibidos (tres campos: Efectivo / Revolut / Sumup)
-- Preview en tiempo real de todos los cálculos mientras se tipea
-- Guardar en Firestore con un click
-- Limpiar formulario
+- Formulario dinámico: fecha, horario, PAX por plataforma, cobros por medio de pago
+- Preview en tiempo real de todos los cálculos
+- Guardar / Limpiar
 
-### Vista Historial — modo "Por mes"
-- Navegación mes a mes con flechas
-- 5 tarjetas de resumen del mes: tours, PAX total, comisiones, cobros totales, ganancia neta
-- Tabla completa con todos los registros del mes — columna "Cobros" muestra total; si hay Revolut o Sumup, muestra desglose en sub-línea (Ef / Rv / Su)
-- Fila de totales al pie de la tabla
-- Editar cualquier registro (modal slide-up en móvil) — incluye los tres campos de cobro
-- Eliminar registro con confirmación
-- Exportar CSV del mes (con BOM UTF-8, separador `;`, compatible con Excel) — incluye columnas Efectivo, Revolut, Sumup y Total Cobros
+### Vista Historial — Por mes
+- Navegación mes a mes, 5 tarjetas de resumen
+- Tabla dinámica con columnas según las plataformas del usuario
+- Editar (modal slide-up en móvil) / Eliminar con confirmación
+- Exportar CSV (BOM UTF-8, separador `;`, compatible con Excel)
 
-### Vista Historial — modo "Por período"
-- Filtro libre por rango de fechas (desde / hasta), independiente del mes calendario
-- Resumen del período con 9 tarjetas: Civitatis, Viabam, Web, Total comisiones, Efectivo, Revolut, Sumup, Total cobros, Ganancia neta
-- Tabla detallada del período con totales al pie
-- Exportar CSV del período (nombre de archivo incluye fechas del rango) — mismas columnas extendidas
+### Vista Historial — Por período
+- Filtro libre por rango de fechas
+- Tarjetas de breakdown por plataforma y medio de pago
+- Tabla detallada + exportar CSV del período
 
-### Indicador de sincronización (header)
-| Estado | Color | Cuándo |
-|---|---|---|
-| Conectando… | Gris | Al iniciar |
-| Guardando… | Naranja | Escritura pendiente de confirmar |
-| Sincronizado | Verde | Datos confirmados en servidor |
-| Sin conexión | Rojo | Sin internet o error de Firestore |
+### Vista Configuración
+- Agregar, editar y eliminar plataformas/tarifas
+- Agregar, editar y eliminar medios de pago
+- Se guarda en `users/{uid}/config/settings` y se aplica globalmente
 
-### Responsive / móvil
-- Header de dos filas en móvil (logo + nav)
-- Inputs a `font-size: 16px` para evitar zoom automático en iOS
-- Touch targets mínimos de 44–48px
-- Modal como bottom sheet en móvil (slide-up desde el borde inferior)
-- Toast full-width en móvil
+### Indicador de sincronización
+Gris (conectando) → Naranja (guardando) → Verde (sincronizado) → Rojo (sin conexión)
+
+### Responsive
+- Header de dos filas en móvil, nav full-width
+- Inputs `font-size: 16px` para evitar zoom en iOS
+- Touch targets mínimos 44–48px
+- Modal como bottom sheet en móvil
 
 ---
 
-## Modelo de datos (documento Firestore)
+## Modelo de datos
 
+### Registro (nuevo formato — v1.3+)
 ```js
 {
-  id:           1234567890123,   // Date.now() — también es el ID del documento
-  fecha:        "2026-03-15",    // YYYY-MM-DD
-  horario:      "SM 10:30",
-  civitatis:    5,               // PAX
-  viabam:       3,               // PAX
-  web:          2,               // PAX
-  efectivo:     80.00,           // cobro en efectivo
-  revolut:      30.00,           // cobro por Revolut
-  sumup:        10.00,           // cobro por Sumup
-  totalCash:    120.00,          // efectivo + revolut + sumup
-  totalPax:     10,
-  civitatisFee: 15.00,
-  viabamFee:    7.50,
-  webFee:       4.00,
-  totalComm:    26.50,
-  netGain:      93.50            // totalCash - totalComm
+  id:         1234567890123,      // Date.now() — también ID del documento
+  fecha:      "2026-04-07",       // YYYY-MM-DD
+  horario:    "SM 10:30",
+  pax:        { 'Civitatis': 5, 'Viabam': 3, 'Web': 2 },
+  fees:       { 'Civitatis': 15, 'Viabam': 7.5, 'Web': 4 },
+  payments:   { 'Efectivo': 80, 'Revolut': 30 },
+  totalPax:   10,
+  totalComm:  26.50,
+  totalCash:  110.00,
+  netGain:    83.50
 }
 ```
 
-**Compatibilidad hacia atrás:** registros anteriores no tienen `revolut`, `sumup` ni `totalCash`. El helper `getTotalCash(r)` detecta esto y usa `r.efectivo` directamente.
+**Compatibilidad con registros anteriores (v1.0–v1.2):** los helpers `getRecordPax(r)`, `getRecordFees(r)`, `getRecordPayments(r)` detectan el formato viejo (`civitatis`, `viabam`, `web`, `efectivo`, `revolut`, `sumup`) y lo convierten al vuelo.
+
+### Config de usuario
+```js
+// users/{uid}/config/settings
+{
+  platforms:      [{ name: 'Civitatis', rate: 3 }, ...],
+  paymentMethods: ['Efectivo', 'Revolut', 'Sumup']
+}
+```
 
 ---
 
-## Decisiones técnicas relevantes
+## Decisiones técnicas
 
-- **Claves Firebase en env vars (no hardcodeadas):** `functions/firebase-config.js` es una Cloudflare Pages Function que sirve la config vía `GET /firebase-config`; el frontend la fetchea al arrancar antes de inicializar Firebase. Evita exponer claves en el código fuente público
-- **Un solo archivo principal:** facilita el deploy en Cloudflare Pages sin configuración de build
-- **SDK compat (no modular):** más simple para un archivo sin bundler; la diferencia de tamaño no importa en este contexto
-- **`onSnapshot` como única fuente de verdad:** todas las escrituras (add/edit/delete) van a Firestore y el listener se encarga de actualizar la UI; no hay estado local que gestionar manualmente
-- **`enablePersistence` se registra después del listener:** evita que un fallo de persistencia bloquee la conexión inicial a Firestore
-- **IDs como `Date.now()`:** simple y suficiente para uso personal de un solo usuario; no hay riesgo de colisión
-- **CSV con BOM UTF-8 y separador `;`:** necesario para que Excel en español abra el archivo correctamente sin configuración adicional
-- **Firebase Auth email/password:** reemplazó al sistema de PIN. La sesión la gestiona Firebase automáticamente; `onAuthStateChanged` decide si mostrar el login o la app. `signOut()` cierra la sesión desde cualquier dispositivo
+- **Multiusuario vía subcolecciones:** cada usuario tiene `users/{uid}/registros/` y `users/{uid}/config/settings`. Las reglas de Firestore garantizan aislamiento total.
+- **Registro controlado:** verificación client-side de `approved_emails/{email}` antes de `createUserWithEmailAndPassword`. El admin aprueba emails desde Firebase Console.
+- **Formularios y tablas 100% dinámicos:** se generan con `buildForms()` al iniciar sesión, según la config del usuario. Si cambia la config, se reconstruyen.
+- **Claves Firebase en env vars:** `functions/firebase-config.js` evita exponer claves en el código fuente público.
+- **Un solo archivo principal:** facilita el deploy sin build step.
+- **SDK compat (no modular):** más simple para un archivo sin bundler.
+- **`onSnapshot` como única fuente de verdad:** no hay estado local; Firestore actualiza la UI automáticamente.
+- **IDs como `Date.now()`:** suficiente para uso personal; sin riesgo de colisión con un usuario a la vez.
+- **CSV con BOM UTF-8 y separador `;`:** necesario para Excel en español.
 
 ---
 
 ## Historial de versiones
 
 ### v1.0 — 06/04/2026
-- Versión inicial estable con registro de tours, historial, exportación CSV y PIN de acceso
-- Firebase Firestore como base de datos
-- Deploy en Cloudflare Pages
+- Versión inicial: registro de tours, historial, CSV, PIN de acceso, Firestore
 
 ### v1.1 — 06/04/2026
-- Claves de Firebase movidas a variables de entorno de Cloudflare
-- Agregada función `functions/firebase-config.js` para cargar config de forma segura
+- Claves Firebase movidas a variables de entorno de Cloudflare (`functions/firebase-config.js`)
 
 ### v1.2 — 06/04/2026
 - Reemplazado PIN por Firebase Authentication (email/password)
-- Reglas de Firestore actualizadas: `if request.auth != null` (base de datos ya no es pública)
-- Eliminado todo el código relacionado al PIN (`CORRECT_PIN`, `PIN_KEY`, localStorage)
+- Reglas de Firestore actualizadas: `if request.auth != null`
+
+### v1.3 — 07/04/2026
+- **Multiusuario:** datos separados por usuario en `users/{uid}/registros/`
+- **Registro controlado:** solo emails aprobados en `approved_emails` pueden crear cuenta
+- **Vista Configuración:** plataformas/tarifas y medios de pago completamente personalizables por usuario
+- **Formularios y tablas dinámicos:** se adaptan a la config de cada usuario
+- Migración de datos existentes de `/registros/` → `/users/{uid}/registros/`
+- Nuevo modelo de datos con `pax`, `fees`, `payments` (objetos dinámicos)
+- Compatibilidad hacia atrás con registros en formato anterior
