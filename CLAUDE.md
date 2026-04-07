@@ -10,13 +10,13 @@ Herramienta para que guías turísticos registren y calculen comisiones de tours
 
 | Capa | Tecnología |
 |---|---|
-| Frontend | HTML + CSS + JS vanilla — un único archivo `index.html` |
+| Frontend | HTML + CSS + JS vanilla — `index.html` + `style.css` + `app.js` |
 | Base de datos | Firebase Firestore (SDK compat v10.14.1 vía CDN) |
 | Hosting | Cloudflare Pages |
 | Repositorio | GitHub (`morgantin29-bit/app-comisiones-itaka`) |
 | Fuente | Google Fonts (Inter) |
 
-**Sin framework, sin build step, sin bundler.** Deploy directo: push a GitHub → Cloudflare Pages publica automáticamente.
+**Sin framework, sin build step, sin bundler.** Deploy directo: push a GitHub → Cloudflare Pages publica automáticamente (sirve los tres archivos estáticos sin configuración adicional).
 
 ---
 
@@ -88,7 +88,9 @@ service cloud.firestore {
 
 ```
 Appcomisiones-itaka/
-├── index.html                 # Toda la app (HTML + CSS + JS)
+├── index.html                 # Esqueleto HTML (~290 líneas)
+├── style.css                  # Todos los estilos (~765 líneas)
+├── app.js                     # Toda la lógica JS (~878 líneas)
 ├── functions/
 │   └── firebase-config.js     # Cloudflare Pages Function — sirve config de Firebase
 └── CLAUDE.md
@@ -184,8 +186,8 @@ Gris (conectando) → Naranja (guardando) → Verde (sincronizado) → Rojo (sin
 - **Registro controlado:** verificación client-side de `approved_emails/{email}` antes de `createUserWithEmailAndPassword`. El admin aprueba emails desde Firebase Console.
 - **Formularios y tablas 100% dinámicos:** se generan con `buildForms()` al iniciar sesión, según la config del usuario. Si cambia la config, se reconstruyen.
 - **Claves Firebase en env vars:** `functions/firebase-config.js` evita exponer claves en el código fuente público.
-- **Un solo archivo principal:** facilita el deploy sin build step.
-- **SDK compat (no modular):** más simple para un archivo sin bundler.
+- **Tres archivos separados (index.html / style.css / app.js):** mantenibilidad sin sacrificar simplicidad. Cloudflare Pages los sirve estáticos sin configuración extra.
+- **SDK compat (no modular):** más simple para un proyecto sin bundler.
 - **`onSnapshot` como única fuente de verdad:** no hay estado local; Firestore actualiza la UI automáticamente.
 - **IDs como `Date.now()`:** suficiente para uso personal; sin riesgo de colisión con un usuario a la vez.
 - **CSV con BOM UTF-8 y separador `;`:** necesario para Excel en español.
@@ -212,3 +214,8 @@ Gris (conectando) → Naranja (guardando) → Verde (sincronizado) → Rojo (sin
 - Migración de datos existentes de `/registros/` → `/users/{uid}/registros/`
 - Nuevo modelo de datos con `pax`, `fees`, `payments` (objetos dinámicos)
 - Compatibilidad hacia atrás con registros en formato anterior
+
+### v1.4 — 07/04/2026
+- **Refactor estructural:** CSS y JS extraídos del `index.html` a `style.css` y `app.js`
+- `index.html` reducido de ~1935 líneas a ~290 (solo HTML)
+- Sin cambios en funcionalidad ni en el proceso de deploy
