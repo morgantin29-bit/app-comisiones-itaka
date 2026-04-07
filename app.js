@@ -125,14 +125,17 @@ async function loadUserConfig() {
       const data = doc.data();
       userConfig = {
         platforms:      (data.platforms      && data.platforms.length)      ? data.platforms      : DEFAULT_CONFIG.platforms,
-        paymentMethods: (data.paymentMethods && data.paymentMethods.length) ? data.paymentMethods : DEFAULT_CONFIG.paymentMethods
+        paymentMethods: (data.paymentMethods && data.paymentMethods.length) ? data.paymentMethods : DEFAULT_CONFIG.paymentMethods,
+        userName:       data.userName || ''
       };
     } else {
       userConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+      userConfig.userName = '';
       // Guardar config inicial para el usuario nuevo
       await db.collection('users').doc(currentUser.uid)
         .collection('config').doc('settings').set(userConfig);
     }
+    updateGreeting(userConfig.userName);
   } catch (e) {
     console.warn('No se pudo cargar la config, usando defaults:', e);
     userConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
@@ -158,10 +161,13 @@ async function saveConfig() {
   if (platforms.length === 0)      { toast('Necesitás al menos una plataforma', 'err'); return; }
   if (paymentMethods.length === 0) { toast('Necesitás al menos un medio de pago', 'err'); return; }
 
+  const userName = document.getElementById('cfg-name').value.trim();
+
   try {
-    userConfig = { platforms, paymentMethods };
+    userConfig = { platforms, paymentMethods, userName };
     await db.collection('users').doc(currentUser.uid)
       .collection('config').doc('settings').set(userConfig);
+    updateGreeting(userName);
     buildForms();
     toast('Configuración guardada');
   } catch (e) {
@@ -170,8 +176,16 @@ async function saveConfig() {
   }
 }
 
+/* ─────────────────────── Greeting ───────────────────── */
+function updateGreeting(name) {
+  const el = document.getElementById('header-greeting');
+  if (el) el.textContent = name ? `Hola, ${name}` : '';
+}
+
 /* ─────────────────────── Config view UI ─────────────── */
 function renderConfigView() {
+  document.getElementById('cfg-name').value = userConfig.userName || '';
+
   const platContainer = document.getElementById('cfg-platforms');
   platContainer.innerHTML = '';
   userConfig.platforms.forEach(p => addPlatformRow(p.name, p.rate));

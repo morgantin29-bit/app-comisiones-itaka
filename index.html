@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Itaka — Comisiones</title>
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#13131f">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -68,13 +72,16 @@
 
 <header id="app-header" style="display:none">
   <div class="logo"><em>Itaka</em> Comisiones</div>
-  <span id="sync-status" class="sync-pill sync-loading">Conectando…</span>
   <nav>
     <button class="nav-btn active" onclick="switchView('registro')">Registrar</button>
     <button class="nav-btn"        onclick="switchView('historial')">Historial</button>
     <button class="nav-btn"        onclick="switchView('config')">Configuración</button>
   </nav>
-  <button class="btn-signout" onclick="cerrarSesion()" title="Cerrar sesión">Salir</button>
+  <div class="header-right">
+    <span id="header-greeting" class="header-greeting"></span>
+    <span id="sync-status" class="sync-pill sync-loading">Conectando…</span>
+    <button class="btn-signout" onclick="cerrarSesion()" title="Cerrar sesión">Salir</button>
+  </div>
 </header>
 
 <main id="app-main" style="display:none">
@@ -215,6 +222,15 @@
     <h2 class="section-title">Configuración</h2>
 
     <div class="card">
+
+      <!-- Nombre -->
+      <div class="config-section">
+        <div class="config-section-title">Tu nombre</div>
+        <div class="config-section-desc">Aparece como saludo en el encabezado de la app.</div>
+        <input type="text" id="cfg-name" placeholder="Ej: Julian" maxlength="30" style="max-width:280px">
+      </div>
+
+      <hr class="divider">
 
       <!-- Plataformas -->
       <div class="config-section">

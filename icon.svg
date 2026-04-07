@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fondo redondeado -->
+  <rect width="512" height="512" rx="115" fill="#13131f"/>
+  <!-- Lápiz rotado 45° -->
+  <g transform="translate(256,256) rotate(-45)">
+    <!-- Goma (eraser) -->
+    <rect x="-35" y="-150" width="70" height="35" rx="10" fill="#f472b6"/>
+    <!-- Virola metálica -->
+    <rect x="-35" y="-115" width="70" height="16" fill="#a5b4fc"/>
+    <!-- Cuerpo del lápiz -->
+    <rect x="-35" y="-99" width="70" height="199" fill="#6366f1"/>
+    <!-- Punta de madera (trapecio) -->
+    <polygon points="-35,100 35,100 14,135 -14,135" fill="#fde68a"/>
+    <!-- Grafito (punta) -->
+    <polygon points="-14,135 14,135 0,150" fill="#e2e8f0"/>
+  </g>
+</svg>

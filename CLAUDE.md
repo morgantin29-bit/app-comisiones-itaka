@@ -16,7 +16,7 @@ Herramienta para que guías turísticos registren y calculen comisiones de tours
 | Repositorio | GitHub (`morgantin29-bit/app-comisiones-itaka`) |
 | Fuente | Google Fonts (Inter) |
 
-**Sin framework, sin build step, sin bundler.** Deploy directo: push a GitHub → Cloudflare Pages publica automáticamente (sirve los tres archivos estáticos sin configuración adicional).
+**Sin framework, sin build step, sin bundler.** Deploy directo: push a GitHub → Cloudflare Pages publica automáticamente (sirve los archivos estáticos sin configuración adicional).
 
 ---
 
@@ -88,9 +88,11 @@ service cloud.firestore {
 
 ```
 Appcomisiones-itaka/
-├── index.html                 # Esqueleto HTML (~295 líneas)
-├── style.css                  # Todos los estilos (~776 líneas)
-├── app.js                     # Toda la lógica JS (~879 líneas)
+├── index.html                 # Esqueleto HTML
+├── style.css                  # Todos los estilos
+├── app.js                     # Toda la lógica JS
+├── icon.svg                   # Ícono PWA (lápiz violeta sobre fondo oscuro)
+├── manifest.json              # Web App Manifest para instalación en home screen
 ├── functions/
 │   └── firebase-config.js     # Cloudflare Pages Function — sirve config de Firebase
 └── CLAUDE.md
@@ -134,6 +136,7 @@ SM 10:00 / SM 10:30 / SM 13:00 / SM 13:30
 - Tabla detallada + exportar CSV del período
 
 ### Vista Configuración
+- Campo "Tu nombre" — se guarda en Firestore y aparece como saludo en el header
 - Agregar, editar y eliminar plataformas/tarifas
 - Agregar, editar y eliminar medios de pago
 - Se guarda en `users/{uid}/config/settings` y se aplica globalmente
@@ -141,11 +144,21 @@ SM 10:00 / SM 10:30 / SM 13:00 / SM 13:30
 ### Indicador de sincronización
 Gris (conectando) → Naranja (guardando) → Verde (sincronizado) → Rojo (sin conexión)
 
+### Saludo personalizado en header
+- Muestra "Hola, [Nombre]" al iniciar sesión
+- El nombre se guarda en `users/{uid}/config/settings` como campo `userName`
+- Se configura desde la vista Configuración; se actualiza en el header al instante
+- Si no hay nombre guardado, el saludo no aparece (no rompe nada)
+
 ### Responsive
-- Header de dos filas en móvil, nav full-width
+- Header: logo + `.header-right` (greeting · sync · salir) en fila 1; nav full-width en fila 2
 - Inputs `font-size: 16px` para evitar zoom en iOS
 - Touch targets mínimos 44–48px
 - Modal como bottom sheet en móvil
+
+### PWA / Ícono
+- `icon.svg` + `manifest.json` para instalación en home screen (Android)
+- Ícono: lápiz violeta diagonal sobre fondo oscuro redondeado
 
 ---
 
@@ -174,7 +187,8 @@ Gris (conectando) → Naranja (guardando) → Verde (sincronizado) → Rojo (sin
 // users/{uid}/config/settings
 {
   platforms:      [{ name: 'Civitatis', rate: 3 }, ...],
-  paymentMethods: ['Efectivo', 'Revolut', 'Sumup']
+  paymentMethods: ['Efectivo', 'Revolut', 'Sumup'],
+  userName:       'Julian'   // opcional — campo agregado en v1.6
 }
 ```
 
@@ -225,3 +239,9 @@ Gris (conectando) → Naranja (guardando) → Verde (sincronizado) → Rojo (sin
 - Agregado `#loading-screen` (fondo oscuro + logo) que se muestra mientras Firebase resuelve el auth state
 - `#login-screen` ahora inicia oculto; solo aparece cuando `onAuthStateChanged` confirma que no hay sesión activa
 - Sin cambios en funcionalidad
+
+### v1.6 — 07/04/2026
+- **Saludo personalizado:** campo `userName` en `users/{uid}/config/settings`; header muestra "Hola, [Nombre]"
+- **Header reestructurado:** logo | nav | `.header-right` (greeting + sync + salir) en desktop; logo | header-right | nav en móvil
+- **Campo "Tu nombre" en Configuración:** se guarda en Firestore y sincroniza entre dispositivos
+- **PWA:** agregados `icon.svg` (lápiz violeta) y `manifest.json`; favicon en tab del browser

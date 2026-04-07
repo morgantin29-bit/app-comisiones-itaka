@@ -1,0 +1,16 @@
+{
+  "name": "Itaka Comisiones",
+  "short_name": "Itaka",
+  "description": "Registro de comisiones para guías turísticos",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#13131f",
+  "theme_color": "#13131f",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
