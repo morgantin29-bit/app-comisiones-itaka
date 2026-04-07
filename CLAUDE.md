@@ -102,8 +102,11 @@ Appcomisiones-itaka/
 
 ## Lógica de negocio
 
-### Horarios disponibles
-SM 10:00 / SM 10:30 / SM 13:00 / SM 13:30
+### Tours y horarios
+**Completamente configurables por usuario** desde la pestaña Configuración. Defaults iniciales:
+- San Marco 10:00 / San Marco 10:30 / San Marco 13:00 / San Marco 13:30
+
+Cada entrada tiene: nombre del tour + hora. En el dropdown de Registro se muestran combinados ("San Marco 10:00"). En el historial se separan en columnas Tour y Horario.
 
 ### Tarifas y medios de pago
 **Completamente configurables por usuario** desde la pestaña Configuración. Defaults iniciales:
@@ -120,23 +123,24 @@ SM 10:00 / SM 10:30 / SM 13:00 / SM 13:30
 ## Funcionalidades
 
 ### Vista Registrar
-- Formulario dinámico: fecha, horario, PAX por plataforma, cobros por medio de pago
+- Formulario dinámico: fecha, dropdown "Tour" (configurable), PAX por plataforma, cobros por medio de pago
 - Preview en tiempo real de todos los cálculos
 - Guardar / Limpiar
 
 ### Vista Historial — Por mes
 - Navegación mes a mes, 5 tarjetas de resumen
-- Tabla dinámica con columnas según las plataformas del usuario
+- Tabla dinámica: columnas Tour y Horario separadas + columnas por plataforma
 - Editar (modal slide-up en móvil) / Eliminar con confirmación
-- Exportar CSV (BOM UTF-8, separador `;`, compatible con Excel)
+- Exportar CSV (BOM UTF-8, separador `;`, compatible con Excel) — incluye Tour y Horario como columnas separadas
 
 ### Vista Historial — Por período
 - Filtro libre por rango de fechas
 - Tarjetas de breakdown por plataforma y medio de pago
-- Tabla detallada + exportar CSV del período
+- Tabla detallada con columnas Tour y Horario + exportar CSV del período
 
 ### Vista Configuración
 - Campo "Tu nombre" — se guarda en Firestore y aparece como saludo en el header
+- **Tours y horarios:** agregar, editar y eliminar tours (nombre + hora)
 - Agregar, editar y eliminar plataformas/tarifas
 - Agregar, editar y eliminar medios de pago
 - Se guarda en `users/{uid}/config/settings` y se aplica globalmente
@@ -164,12 +168,14 @@ Gris (conectando) → Naranja (guardando) → Verde (sincronizado) → Rojo (sin
 
 ## Modelo de datos
 
-### Registro (nuevo formato — v1.3+)
+### Registro (formato actual — v1.7+)
 ```js
 {
   id:         1234567890123,      // Date.now() — también ID del documento
   fecha:      "2026-04-07",       // YYYY-MM-DD
-  horario:    "SM 10:30",
+  horario:    "San Marco 10:00",  // combined — mantenido para compat y CSV
+  tour:       "San Marco",        // campo separado — agregado en v1.7
+  time:       "10:00",            // campo separado — agregado en v1.7
   pax:        { 'Civitatis': 5, 'Viabam': 3, 'Web': 2 },
   fees:       { 'Civitatis': 15, 'Viabam': 7.5, 'Web': 4 },
   payments:   { 'Efectivo': 80, 'Revolut': 30 },
@@ -180,7 +186,9 @@ Gris (conectando) → Naranja (guardando) → Verde (sincronizado) → Rojo (sin
 }
 ```
 
-**Compatibilidad con registros anteriores (v1.0–v1.2):** los helpers `getRecordPax(r)`, `getRecordFees(r)`, `getRecordPayments(r)` detectan el formato viejo (`civitatis`, `viabam`, `web`, `efectivo`, `revolut`, `sumup`) y lo convierten al vuelo.
+**Compatibilidad con registros anteriores:**
+- v1.0–v1.2: helpers `getRecordPax(r)`, `getRecordFees(r)`, `getRecordPayments(r)` detectan campos viejos (`civitatis`, `viabam`, etc.)
+- v1.3–v1.6: registros con `horario: "SM 10:00"` sin `tour`/`time` → migración automática al abrir la app (`migrateOldRecords()`) + helpers `getRecordTour(r)` / `getRecordTime(r)` parsean al vuelo si la migración aún no corrió
 
 ### Config de usuario
 ```js
@@ -188,6 +196,7 @@ Gris (conectando) → Naranja (guardando) → Verde (sincronizado) → Rojo (sin
 {
   platforms:      [{ name: 'Civitatis', rate: 3 }, ...],
   paymentMethods: ['Efectivo', 'Revolut', 'Sumup'],
+  schedules:      [{ tour: 'San Marco', time: '10:00' }, ...],  // agregado en v1.7
   userName:       'Julian'   // opcional — campo agregado en v1.6
 }
 ```
@@ -245,3 +254,12 @@ Gris (conectando) → Naranja (guardando) → Verde (sincronizado) → Rojo (sin
 - **Header reestructurado:** logo | nav | `.header-right` (greeting + sync + salir) en desktop; logo | header-right | nav en móvil
 - **Campo "Tu nombre" en Configuración:** se guarda en Firestore y sincroniza entre dispositivos
 - **PWA:** agregados `icon.svg` (lápiz violeta) y `manifest.json`; favicon en tab del browser
+
+### v1.7 — 08/04/2026
+- **Tours y horarios configurables:** cada guía define sus propios tours (nombre + hora) desde Configuración
+- **Dropdown "Tour" dinámico** en Registro y modal Editar — generado desde `userConfig.schedules`
+- **Historial:** columna "Horario" reemplazada por dos columnas separadas: Tour (truncado en mobile) y Horario
+- **CSV:** columnas Tour y Horario exportadas por separado
+- **Migración automática:** al iniciar sesión, `migrateOldRecords()` parsea registros con `horario: "SM HH:MM"` y les agrega `tour` y `time` en Firestore — sin intervención manual
+- **Nuevos helpers:** `getRecordTour(r)` / `getRecordTime(r)` con backward compat total
+- **Nuevo campo en config:** `schedules: [{ tour, time }]` en `users/{uid}/config/settings`
