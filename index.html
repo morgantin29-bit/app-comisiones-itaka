@@ -138,7 +138,7 @@
     /* ── PAX sources ──────────────────────────────── */
     .pax-row {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
       gap: 12px;
     }
 
@@ -159,9 +159,6 @@
       border-radius: 50%;
       flex-shrink: 0;
     }
-    .dot-civ { background: var(--civ); }
-    .dot-via { background: var(--via); }
-    .dot-web { background: var(--web); }
 
     /* ── Preview ──────────────────────────────────── */
     .preview {
@@ -183,7 +180,7 @@
 
     .preview-row {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
       gap: 10px;
       margin-bottom: 14px;
     }
@@ -519,130 +516,55 @@
       letter-spacing: .5px;
     }
 
-    /* ── Responsive ───────────────────────────────── */
-    @media (max-width: 640px) {
+    /* ── Config view ──────────────────────────────── */
+    .config-section { margin-bottom: 28px; }
+    .config-section:last-child { margin-bottom: 0; }
 
-      /* Header: logo+sync row 1, nav full-width row 2 */
-      header {
-        height: auto;
-        flex-wrap: wrap;
-        padding: 0;
-        justify-content: flex-start;
-      }
-      .logo {
-        flex: 1;
-        padding: 14px 16px;
-        font-size: 16px;
-      }
-      #sync-status {
-        align-self: center;
-        margin-right: 14px;
-        font-size: 10px;
-        padding: 3px 9px;
-      }
-      nav {
-        width: 100%;
-        order: 3;
-        border-top: 1px solid var(--border);
-      }
-      .nav-btn {
-        flex: 1;
-        border-radius: 0;
-        padding: 13px 8px;
-        font-size: 14px;
-        text-align: center;
-      }
-
-      /* Layout */
-      main { padding: 20px 14px 90px; }
-      .section-title { font-size: 18px; margin-bottom: 16px; }
-      .card { padding: 18px 15px; }
-
-      /* Inputs: 16px evita zoom en iOS */
-      input, select { font-size: 16px; padding: 12px 13px; }
-
-      /* Touch targets mínimos */
-      .btn         { min-height: 48px; }
-      .btn-sm      { min-height: 44px; padding: 8px 14px; }
-      .btn-icon    { min-height: 44px; min-width: 44px; padding: 8px 12px; }
-      button       { -webkit-tap-highlight-color: transparent; }
-
-      /* Form */
-      .form-grid { grid-template-columns: 1fr; gap: 14px; }
-      /* PAX: 3 columnas, los campos son números cortos */
-      .pax-row { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-      .source-tag { font-size: 10px; }
-
-      /* Preview */
-      .preview { padding: 14px 12px; }
-      .preview-row {
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        margin-bottom: 10px;
-      }
-      .preview-val { font-size: 17px; }
-      .preview-totals { flex-direction: column; gap: 10px; }
-      .total-val { font-size: 16px; }
-      .total-lbl { font-size: 11px; }
-
-      /* Form actions: columna, botón principal arriba */
-      .form-actions { flex-direction: column; gap: 8px; }
-      .form-actions .btn { width: 100%; text-align: center; }
-
-      /* History tabs: ancho completo */
-      .hist-tabs { width: 100%; }
-      .hist-tab { flex: 1; text-align: center; padding: 9px 6px; font-size: 13px; }
-
-      /* History controls: columna */
-      .hist-controls {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-      }
-      .month-nav { justify-content: space-between; }
-      .month-label { min-width: 0; flex: 1; font-size: 15px; }
-      .hist-controls .btn-ghost { text-align: center; }
-      .hist-controls span:empty { display: none; }
-
-      /* Summary / breakdown: 2 columnas fijas en móvil */
-      .summary-grid   { grid-template-columns: 1fr 1fr; gap: 10px; }
-      .breakdown-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-      .sum-val        { font-size: 18px; }
-      .sum-card       { padding: 13px 10px; }
-      .breakdown-val  { font-size: 18px; }
-      .breakdown-card { padding: 13px 10px; }
-
-      /* Period filter */
-      .period-filter { grid-template-columns: 1fr 1fr; }
-      .period-filter .btn { grid-column: 1 / -1; }
-
-      /* Table: padding compacto */
-      thead th  { padding: 10px 9px; font-size: 10.5px; }
-      tbody td  { padding: 10px 9px; font-size: 12.5px; }
-      tfoot td  { padding: 10px 9px; font-size: 12px; }
-      /* Acciones en columna para no ensanchar la tabla */
-      .td-actions { flex-direction: column; gap: 4px; align-items: flex-start; }
-      .td-actions .btn-sm  { padding: 6px 10px; font-size: 11.5px; }
-      .td-actions .btn-icon { min-width: 36px; min-height: 36px; }
-
-      /* Modal: slide-up desde el fondo */
-      .overlay { align-items: flex-end; padding: 0; }
-      .modal {
-        border-radius: 18px 18px 0 0;
-        max-height: 90vh;
-        padding: 22px 18px 32px;
-      }
-      .modal .form-grid { grid-template-columns: 1fr; }
-      .modal .pax-row   { grid-template-columns: 1fr 1fr 1fr; }
-
-      /* Toast: ancho completo centrado */
-      .toast {
-        left: 14px;
-        right: 14px;
-        bottom: 14px;
-        text-align: center;
-      }
+    .config-section-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text);
     }
+    .config-section-desc {
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .config-col-labels {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 6px;
+      padding: 0 2px;
+    }
+    .config-col-labels.platforms { grid-template-columns: 1fr 100px 38px; }
+    .config-col-labels label { margin: 0; font-size: 10.5px; }
+
+    .config-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+
+    .config-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .config-item .cfg-name { flex: 1; }
+    .config-item .cfg-rate { width: 100px; flex-shrink: 0; }
+
+    .config-add-btn {
+      background: none;
+      border: 1px dashed var(--border);
+      color: var(--muted);
+      padding: 9px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-family: inherit;
+      width: 100%;
+      transition: all .18s;
+      text-align: left;
+    }
+    .config-add-btn:hover { border-color: var(--accent); color: var(--accent); }
 
     /* ── Login screen ────────────────────────────── */
     #login-screen {
@@ -687,6 +609,22 @@
       min-height: 18px;
     }
 
+    .login-toggle {
+      margin-top: 20px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .login-toggle button {
+      background: none;
+      border: none;
+      color: var(--accent);
+      cursor: pointer;
+      font-size: 13px;
+      font-family: inherit;
+      text-decoration: underline;
+      padding: 0;
+    }
+
     /* Botón cerrar sesión en header */
     .btn-signout {
       background: none;
@@ -703,9 +641,135 @@
     }
     .btn-signout:hover { border-color: var(--danger); color: var(--danger); }
 
+    /* ── Responsive ───────────────────────────────── */
     @media (max-width: 640px) {
+
+      /* Header: logo+sync row 1, nav full-width row 2 */
+      header {
+        height: auto;
+        flex-wrap: wrap;
+        padding: 0;
+        justify-content: flex-start;
+      }
+      .logo {
+        flex: 1;
+        padding: 14px 16px;
+        font-size: 16px;
+      }
+      #sync-status {
+        align-self: center;
+        margin-right: 14px;
+        font-size: 10px;
+        padding: 3px 9px;
+      }
+      nav {
+        width: 100%;
+        order: 3;
+        border-top: 1px solid var(--border);
+      }
+      .nav-btn {
+        flex: 1;
+        border-radius: 0;
+        padding: 13px 8px;
+        font-size: 13px;
+        text-align: center;
+      }
+
+      /* Layout */
+      main { padding: 20px 14px 90px; }
+      .section-title { font-size: 18px; margin-bottom: 16px; }
+      .card { padding: 18px 15px; }
+
+      /* Inputs: 16px evita zoom en iOS */
+      input, select { font-size: 16px; padding: 12px 13px; }
+
+      /* Touch targets mínimos */
+      .btn         { min-height: 48px; }
+      .btn-sm      { min-height: 44px; padding: 8px 14px; }
+      .btn-icon    { min-height: 44px; min-width: 44px; padding: 8px 12px; }
+      button       { -webkit-tap-highlight-color: transparent; }
+
+      /* Form */
+      .form-grid { grid-template-columns: 1fr; gap: 14px; }
+      .pax-row { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; }
+      .source-tag { font-size: 10px; }
+
+      /* Preview */
+      .preview { padding: 14px 12px; }
+      .preview-row {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      .preview-val { font-size: 17px; }
+      .preview-totals { flex-direction: column; gap: 10px; }
+      .total-val { font-size: 16px; }
+      .total-lbl { font-size: 11px; }
+
+      /* Form actions: columna, botón principal arriba */
+      .form-actions { flex-direction: column; gap: 8px; }
+      .form-actions .btn { width: 100%; text-align: center; }
+
+      /* History tabs: ancho completo */
+      .hist-tabs { width: 100%; }
+      .hist-tab { flex: 1; text-align: center; padding: 9px 6px; font-size: 13px; }
+
+      /* History controls: columna */
+      .hist-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+      .month-nav { justify-content: space-between; }
+      .month-label { min-width: 0; flex: 1; font-size: 15px; }
+      .hist-controls .btn-ghost { text-align: center; }
+      .hist-controls span:empty { display: none; }
+
+      /* Summary / breakdown: 2 columnas fijas en móvil */
+      .summary-grid   { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .breakdown-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .sum-val        { font-size: 18px; }
+      .sum-card       { padding: 13px 10px; }
+      .breakdown-val  { font-size: 18px; }
+      .breakdown-card { padding: 13px 10px; }
+
+      /* Period filter */
+      .period-filter { grid-template-columns: 1fr 1fr; }
+      .period-filter .btn { grid-column: 1 / -1; }
+
+      /* Table: padding compacto */
+      thead th  { padding: 10px 9px; font-size: 10.5px; }
+      tbody td  { padding: 10px 9px; font-size: 12.5px; }
+      tfoot td  { padding: 10px 9px; font-size: 12px; }
+      .td-actions { flex-direction: column; gap: 4px; align-items: flex-start; }
+      .td-actions .btn-sm  { padding: 6px 10px; font-size: 11.5px; }
+      .td-actions .btn-icon { min-width: 36px; min-height: 36px; }
+
+      /* Modal: slide-up desde el fondo */
+      .overlay { align-items: flex-end; padding: 0; }
+      .modal {
+        border-radius: 18px 18px 0 0;
+        max-height: 90vh;
+        padding: 22px 18px 32px;
+      }
+      .modal .form-grid { grid-template-columns: 1fr; }
+      .modal .pax-row   { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
+
+      /* Toast: ancho completo centrado */
+      .toast {
+        left: 14px;
+        right: 14px;
+        bottom: 14px;
+        text-align: center;
+      }
+
+      /* Login */
       .login-card { padding: 32px 22px; }
       .btn-signout { font-size: 11px; padding: 4px 9px; }
+
+      /* Config */
+      .config-col-labels.platforms { grid-template-columns: 1fr 80px 38px; }
+      .config-item .cfg-rate { width: 80px; }
     }
   </style>
 </head>
@@ -715,21 +779,51 @@
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo"><em>Itaka</em> Comisiones</div>
-    <p class="login-subtitle">Iniciá sesión para continuar</p>
-    <div style="text-align:left; display:flex; flex-direction:column; gap:14px; margin-bottom:18px">
-      <div class="form-group">
-        <label>Email</label>
-        <input type="email" id="login-email" placeholder="tu@email.com"
-               onkeydown="if(event.key==='Enter') submitLogin()">
+
+    <!-- Panel: Iniciar sesión -->
+    <div id="login-panel">
+      <p class="login-subtitle">Iniciá sesión para continuar</p>
+      <div style="text-align:left; display:flex; flex-direction:column; gap:14px; margin-bottom:18px">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="login-email" placeholder="tu@email.com"
+                 onkeydown="if(event.key==='Enter') submitLogin()">
+        </div>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input type="password" id="login-password" placeholder="••••••••"
+                 onkeydown="if(event.key==='Enter') submitLogin()">
+        </div>
       </div>
-      <div class="form-group">
-        <label>Contraseña</label>
-        <input type="password" id="login-password" placeholder="••••••••"
-               onkeydown="if(event.key==='Enter') submitLogin()">
-      </div>
+      <button class="btn btn-full" id="login-btn" onclick="submitLogin()">Entrar</button>
+      <p class="login-error" id="login-error"></p>
+      <p class="login-toggle">¿No tenés cuenta? <button onclick="showRegisterPanel()">Registrarte</button></p>
     </div>
-    <button class="btn btn-full" id="login-btn" onclick="submitLogin()">Entrar</button>
-    <p class="login-error" id="login-error"></p>
+
+    <!-- Panel: Registrarse -->
+    <div id="register-panel" style="display:none">
+      <p class="login-subtitle">Creá tu cuenta</p>
+      <div style="text-align:left; display:flex; flex-direction:column; gap:14px; margin-bottom:18px">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="reg-email" placeholder="tu@email.com"
+                 onkeydown="if(event.key==='Enter') submitRegister()">
+        </div>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres"
+                 onkeydown="if(event.key==='Enter') submitRegister()">
+        </div>
+        <div class="form-group">
+          <label>Confirmar contraseña</label>
+          <input type="password" id="reg-confirm" placeholder="Repetí la contraseña"
+                 onkeydown="if(event.key==='Enter') submitRegister()">
+        </div>
+      </div>
+      <button class="btn btn-full" id="register-btn" onclick="submitRegister()">Crear cuenta</button>
+      <p class="login-error" id="register-error"></p>
+      <p class="login-toggle">¿Ya tenés cuenta? <button onclick="showLoginPanel()">Iniciar sesión</button></p>
+    </div>
   </div>
 </div>
 
@@ -739,6 +833,7 @@
   <nav>
     <button class="nav-btn active" onclick="switchView('registro')">Registrar</button>
     <button class="nav-btn"        onclick="switchView('historial')">Historial</button>
+    <button class="nav-btn"        onclick="switchView('config')">Configuración</button>
   </nav>
   <button class="btn-signout" onclick="cerrarSesion()" title="Cerrar sesión">Salir</button>
 </header>
@@ -769,38 +864,12 @@
 
         <div class="form-group full">
           <label>Pasajeros por origen</label>
-          <div class="pax-row">
-            <div>
-              <div class="source-tag"><span class="dot dot-civ"></span>Civitatis · ×€3</div>
-              <input type="number" id="civitatis" min="0" value="0" oninput="calcPreview()">
-            </div>
-            <div>
-              <div class="source-tag"><span class="dot dot-via"></span>Viabam · ×€2.50</div>
-              <input type="number" id="viabam" min="0" value="0" oninput="calcPreview()">
-            </div>
-            <div>
-              <div class="source-tag"><span class="dot dot-web"></span>Web · ×€2</div>
-              <input type="number" id="web" min="0" value="0" oninput="calcPreview()">
-            </div>
-          </div>
+          <div class="pax-row" id="pax-fields"></div>
         </div>
 
         <div class="form-group full">
           <label>Cobros recibidos (€)</label>
-          <div class="pax-row">
-            <div>
-              <div class="source-tag">Efectivo</div>
-              <input type="number" id="efectivo" min="0" step="0.01" value="0" oninput="calcPreview()">
-            </div>
-            <div>
-              <div class="source-tag">Revolut</div>
-              <input type="number" id="revolut" min="0" step="0.01" value="0" oninput="calcPreview()">
-            </div>
-            <div>
-              <div class="source-tag">Sumup</div>
-              <input type="number" id="sumup" min="0" step="0.01" value="0" oninput="calcPreview()">
-            </div>
-          </div>
+          <div class="pax-row" id="payment-fields"></div>
         </div>
 
       </div>
@@ -808,24 +877,7 @@
       <!-- Live preview -->
       <div class="preview">
         <div class="preview-header">Cálculo automático</div>
-        <div class="preview-row">
-          <div class="preview-cell">
-            <div class="preview-val c-acc" id="pv-pax">0</div>
-            <div class="preview-lbl">PAX total</div>
-          </div>
-          <div class="preview-cell">
-            <div class="preview-val c-civ" id="pv-civ">€0</div>
-            <div class="preview-lbl">Civitatis</div>
-          </div>
-          <div class="preview-cell">
-            <div class="preview-val c-via" id="pv-via">€0</div>
-            <div class="preview-lbl">Viabam</div>
-          </div>
-          <div class="preview-cell">
-            <div class="preview-val c-web" id="pv-web">€0</div>
-            <div class="preview-lbl">Web</div>
-          </div>
-        </div>
+        <div class="preview-row" id="pv-platforms"></div>
         <hr class="divider">
         <div class="preview-totals">
           <div class="total-block">
@@ -875,13 +927,7 @@
 
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr>
-              <th>Fecha</th><th>Horario</th><th>PAX</th>
-              <th>Civitatis</th><th>Viabam</th><th>Web</th>
-              <th>Comisiones</th><th>Cobros</th><th>Neta</th><th></th>
-            </tr>
-          </thead>
+          <thead id="hist-head"></thead>
           <tbody id="hist-body"></tbody>
           <tfoot id="hist-foot"></tfoot>
         </table>
@@ -906,11 +952,8 @@
 
       <div id="periodo-results" style="display:none">
         <div class="period-info" id="periodo-info"></div>
-
-        <!-- Resumen de comisiones por origen -->
         <div class="breakdown-grid" id="breakdown-grid"></div>
 
-        <!-- Controles de la tabla del período -->
         <div class="hist-controls" style="margin-bottom:16px">
           <span></span>
           <button class="btn btn-ghost btn-sm" onclick="exportCSVPeriodo()">Exportar CSV período</button>
@@ -918,13 +961,7 @@
 
         <div class="table-wrap">
           <table>
-            <thead>
-              <tr>
-                <th>Fecha</th><th>Horario</th><th>PAX</th>
-                <th>Civitatis</th><th>Viabam</th><th>Web</th>
-                <th>Comisiones</th><th>Cobros</th><th>Neta</th>
-              </tr>
-            </thead>
+            <thead id="periodo-head"></thead>
             <tbody id="periodo-body"></tbody>
             <tfoot id="periodo-foot"></tfoot>
           </table>
@@ -932,6 +969,40 @@
       </div>
     </div>
 
+  </div>
+
+  <!-- ═══════════════ CONFIG VIEW ══════════════════ -->
+  <div id="view-config" class="view">
+    <h2 class="section-title">Configuración</h2>
+
+    <div class="card">
+
+      <!-- Plataformas -->
+      <div class="config-section">
+        <div class="config-section-title">Plataformas y tarifas de comisión</div>
+        <div class="config-section-desc">Definí de qué plataformas recibís pasajeros y cuánto cobran por pax.</div>
+        <div class="config-col-labels platforms">
+          <label>Nombre</label>
+          <label>€ / pax</label>
+          <span></span>
+        </div>
+        <div class="config-list" id="cfg-platforms"></div>
+        <button class="config-add-btn" onclick="addPlatformRow()">+ Agregar plataforma</button>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Medios de pago -->
+      <div class="config-section">
+        <div class="config-section-title">Medios de pago</div>
+        <div class="config-section-desc">Definí cómo recibís los cobros de los pasajeros.</div>
+        <div class="config-list" id="cfg-payments"></div>
+        <button class="config-add-btn" onclick="addPaymentRow()">+ Agregar medio de pago</button>
+      </div>
+
+    </div>
+
+    <button class="btn" onclick="saveConfig()">Guardar configuración</button>
   </div>
 
 </main>
@@ -959,37 +1030,11 @@
       </div>
       <div class="form-group full">
         <label>Pasajeros por origen</label>
-        <div class="pax-row">
-          <div>
-            <div class="source-tag"><span class="dot dot-civ"></span>Civitatis · ×€3</div>
-            <input type="number" id="e-civ" min="0" value="0">
-          </div>
-          <div>
-            <div class="source-tag"><span class="dot dot-via"></span>Viabam · ×€2.50</div>
-            <input type="number" id="e-via" min="0" value="0">
-          </div>
-          <div>
-            <div class="source-tag"><span class="dot dot-web"></span>Web · ×€2</div>
-            <input type="number" id="e-web" min="0" value="0">
-          </div>
-        </div>
+        <div class="pax-row" id="e-pax-fields"></div>
       </div>
       <div class="form-group full">
         <label>Cobros recibidos (€)</label>
-        <div class="pax-row">
-          <div>
-            <div class="source-tag">Efectivo</div>
-            <input type="number" id="e-cash" min="0" step="0.01" value="0">
-          </div>
-          <div>
-            <div class="source-tag">Revolut</div>
-            <input type="number" id="e-revolut" min="0" step="0.01" value="0">
-          </div>
-          <div>
-            <div class="source-tag">Sumup</div>
-            <input type="number" id="e-sumup" min="0" step="0.01" value="0">
-          </div>
-        </div>
+        <div class="pax-row" id="e-payment-fields"></div>
       </div>
     </div>
     <div class="form-actions">
@@ -1007,10 +1052,48 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 
 <script>
-  /* ────────────────────────── Firebase ──────────────── */
-  let db, col;
+  /* ─────────────────────── Constantes ─────────────────── */
+  const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
-  /* ────────────────────────── Auth ───────────────────── */
+  // Paleta de colores para plataformas (cicla si hay más de 6)
+  const PLAT_COLORS = ['#818cf8','#fbbf24','#34d399','#f472b6','#60a5fa','#a78bfa'];
+
+  // Config por defecto (se aplica a usuarios nuevos)
+  const DEFAULT_CONFIG = {
+    platforms: [
+      { name: 'Civitatis', rate: 3 },
+      { name: 'Viabam',    rate: 2.5 },
+      { name: 'Web',       rate: 2 }
+    ],
+    paymentMethods: ['Efectivo', 'Revolut', 'Sumup']
+  };
+
+  /* ─────────────────────── Estado global ──────────────── */
+  let db, col, currentUser;
+  let userConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+  let records        = [];
+  let curYear, curMonth;
+  let editingId      = null;
+  let periodoFiltered = [];
+  let appInited      = false;
+  let unsubSnapshot  = null;
+
+  /* ─────────────────────── Login / Register ───────────── */
+  function showLoginPanel() {
+    document.getElementById('login-panel').style.display    = '';
+    document.getElementById('register-panel').style.display = 'none';
+    document.getElementById('login-error').textContent      = '';
+    setTimeout(() => document.getElementById('login-email').focus(), 100);
+  }
+
+  function showRegisterPanel() {
+    document.getElementById('login-panel').style.display    = 'none';
+    document.getElementById('register-panel').style.display = '';
+    document.getElementById('register-error').textContent   = '';
+    setTimeout(() => document.getElementById('reg-email').focus(), 100);
+  }
+
   async function submitLogin() {
     const email    = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
@@ -1023,7 +1106,6 @@
 
     try {
       await firebase.auth().signInWithEmailAndPassword(email, password);
-      // onAuthStateChanged se encarga de llamar showApp()
     } catch (err) {
       const msgs = {
         'auth/invalid-email':      'Email inválido.',
@@ -1038,38 +1120,227 @@
     }
   }
 
+  async function submitRegister() {
+    const email    = document.getElementById('reg-email').value.trim().toLowerCase();
+    const password = document.getElementById('reg-password').value;
+    const confirm  = document.getElementById('reg-confirm').value;
+    const btn      = document.getElementById('register-btn');
+    const errEl    = document.getElementById('register-error');
+
+    errEl.textContent = '';
+
+    if (!email)              { errEl.textContent = 'Ingresá tu email.'; return; }
+    if (password.length < 6) { errEl.textContent = 'La contraseña debe tener al menos 6 caracteres.'; return; }
+    if (password !== confirm) { errEl.textContent = 'Las contraseñas no coinciden.'; return; }
+
+    btn.disabled    = true;
+    btn.textContent = 'Verificando…';
+
+    try {
+      // Verificar si el email está aprobado
+      const snap = await db.collection('approved_emails').doc(email).get();
+      if (!snap.exists) {
+        errEl.textContent = 'Tu email no está autorizado. Contactá al administrador.';
+        btn.disabled    = false;
+        btn.textContent = 'Crear cuenta';
+        return;
+      }
+
+      btn.textContent = 'Creando cuenta…';
+      await firebase.auth().createUserWithEmailAndPassword(email, password);
+      // onAuthStateChanged se encarga del resto
+    } catch (err) {
+      const msgs = {
+        'auth/email-already-in-use': 'Ese email ya tiene una cuenta registrada.',
+        'auth/invalid-email':        'Email inválido.',
+        'auth/weak-password':        'La contraseña es muy débil.',
+      };
+      errEl.textContent = msgs[err.code] || `Error: ${err.code}`;
+      btn.disabled    = false;
+      btn.textContent = 'Crear cuenta';
+    }
+  }
+
+  function cerrarSesion() {
+    if (unsubSnapshot) { unsubSnapshot(); unsubSnapshot = null; }
+    records   = [];
+    appInited = false;
+    firebase.auth().signOut();
+  }
+
+  /* ─────────────────────── Config ─────────────────────── */
+  async function loadUserConfig() {
+    try {
+      const doc = await db
+        .collection('users').doc(currentUser.uid)
+        .collection('config').doc('settings').get();
+
+      if (doc.exists) {
+        const data = doc.data();
+        userConfig = {
+          platforms:      (data.platforms      && data.platforms.length)      ? data.platforms      : DEFAULT_CONFIG.platforms,
+          paymentMethods: (data.paymentMethods && data.paymentMethods.length) ? data.paymentMethods : DEFAULT_CONFIG.paymentMethods
+        };
+      } else {
+        userConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+        // Guardar config inicial para el usuario nuevo
+        await db.collection('users').doc(currentUser.uid)
+          .collection('config').doc('settings').set(userConfig);
+      }
+    } catch (e) {
+      console.warn('No se pudo cargar la config, usando defaults:', e);
+      userConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+    }
+  }
+
+  async function saveConfig() {
+    // Leer plataformas del DOM
+    const platforms = [];
+    document.querySelectorAll('.cfg-platform-row').forEach(row => {
+      const name = row.querySelector('.cfg-name').value.trim();
+      const rate = parseFloat(row.querySelector('.cfg-rate').value) || 0;
+      if (name) platforms.push({ name, rate });
+    });
+
+    // Leer medios de pago del DOM
+    const paymentMethods = [];
+    document.querySelectorAll('.cfg-payment-row').forEach(row => {
+      const name = row.querySelector('.cfg-name').value.trim();
+      if (name) paymentMethods.push(name);
+    });
+
+    if (platforms.length === 0)      { toast('Necesitás al menos una plataforma', 'err'); return; }
+    if (paymentMethods.length === 0) { toast('Necesitás al menos un medio de pago', 'err'); return; }
+
+    try {
+      userConfig = { platforms, paymentMethods };
+      await db.collection('users').doc(currentUser.uid)
+        .collection('config').doc('settings').set(userConfig);
+      buildForms();
+      toast('Configuración guardada');
+    } catch (e) {
+      console.error(e);
+      toast('Error al guardar la configuración', 'err');
+    }
+  }
+
+  /* ─────────────────────── Config view UI ─────────────── */
+  function renderConfigView() {
+    const platContainer = document.getElementById('cfg-platforms');
+    platContainer.innerHTML = '';
+    userConfig.platforms.forEach(p => addPlatformRow(p.name, p.rate));
+
+    const payContainer = document.getElementById('cfg-payments');
+    payContainer.innerHTML = '';
+    userConfig.paymentMethods.forEach(m => addPaymentRow(m));
+  }
+
+  function addPlatformRow(name = '', rate = '') {
+    const row = document.createElement('div');
+    row.className = 'config-item cfg-platform-row';
+    row.innerHTML = `
+      <input type="text"   class="cfg-name" placeholder="Ej: GetYourGuide" value="${escHtml(String(name))}">
+      <input type="number" class="cfg-rate" placeholder="0" value="${rate}" min="0" step="0.01">
+      <button class="btn btn-icon" onclick="this.closest('.cfg-platform-row').remove()" title="Eliminar">×</button>
+    `;
+    document.getElementById('cfg-platforms').appendChild(row);
+  }
+
+  function addPaymentRow(name = '') {
+    const row = document.createElement('div');
+    row.className = 'config-item cfg-payment-row';
+    row.innerHTML = `
+      <input type="text" class="cfg-name" placeholder="Ej: Stripe" value="${escHtml(String(name))}">
+      <button class="btn btn-icon" onclick="this.closest('.cfg-payment-row').remove()" title="Eliminar">×</button>
+    `;
+    document.getElementById('cfg-payments').appendChild(row);
+  }
+
+  /* ─────────────────────── Build dynamic forms ────────── */
+  function buildForms() {
+    buildRegistroForm();
+    buildEditModal();
+  }
+
+  function buildRegistroForm() {
+    // Campos PAX
+    document.getElementById('pax-fields').innerHTML =
+      userConfig.platforms.map((p, i) => `
+        <div>
+          <div class="source-tag">
+            <span class="dot" style="background:${PLAT_COLORS[i % PLAT_COLORS.length]}"></span>
+            ${escHtml(p.name)} · ×€${p.rate}
+          </div>
+          <input type="number" id="pax-${i}" min="0" value="0" oninput="calcPreview()">
+        </div>
+      `).join('');
+
+    // Campos cobros
+    document.getElementById('payment-fields').innerHTML =
+      userConfig.paymentMethods.map((m, i) => `
+        <div>
+          <div class="source-tag">${escHtml(m)}</div>
+          <input type="number" id="pay-${i}" min="0" step="0.01" value="0" oninput="calcPreview()">
+        </div>
+      `).join('');
+
+    // Preview: PAX total + una celda por plataforma
+    document.getElementById('pv-platforms').innerHTML = `
+      <div class="preview-cell">
+        <div class="preview-val c-acc" id="pv-pax">0</div>
+        <div class="preview-lbl">PAX total</div>
+      </div>
+      ${userConfig.platforms.map((p, i) => `
+        <div class="preview-cell">
+          <div class="preview-val" id="pv-plat-${i}" style="color:${PLAT_COLORS[i % PLAT_COLORS.length]}">€0</div>
+          <div class="preview-lbl">${escHtml(p.name)}</div>
+        </div>
+      `).join('')}
+    `;
+
+    calcPreview();
+  }
+
+  function buildEditModal() {
+    document.getElementById('e-pax-fields').innerHTML =
+      userConfig.platforms.map((p, i) => `
+        <div>
+          <div class="source-tag">
+            <span class="dot" style="background:${PLAT_COLORS[i % PLAT_COLORS.length]}"></span>
+            ${escHtml(p.name)} · ×€${p.rate}
+          </div>
+          <input type="number" id="e-pax-${i}" min="0" value="0">
+        </div>
+      `).join('');
+
+    document.getElementById('e-payment-fields').innerHTML =
+      userConfig.paymentMethods.map((m, i) => `
+        <div>
+          <div class="source-tag">${escHtml(m)}</div>
+          <input type="number" id="e-pay-${i}" min="0" step="0.01" value="0">
+        </div>
+      `).join('');
+  }
+
+  /* ─────────────────────── App init ───────────────────── */
   function showApp() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app-header').style.display   = '';
     document.getElementById('app-main').style.display     = '';
+    buildForms();
     init();
   }
 
-  function cerrarSesion() {
-    firebase.auth().signOut();
-  }
-
-  /* ────────────────────────── Constants ──────────────── */
-  const RATES  = { civitatis: 3, viabam: 2.5, web: 2 };
-  const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
-                  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-
-  /* ────────────────────────── State ──────────────────── */
-  let records   = [];
-  let curYear, curMonth;
-  let editingId = null;
-
-  /* ────────────────────────── Init ───────────────────── */
   function init() {
     const now = new Date();
     curYear   = now.getFullYear();
     curMonth  = now.getMonth();
 
     document.getElementById('fecha').value = toISO(now);
-    calcPreview();
 
-    // Listener en tiempo real: actualiza la UI en cualquier dispositivo
-    col.onSnapshot({ includeMetadataChanges: true }, snapshot => {
+    // Listener en tiempo real — apunta a la subcolección del usuario
+    if (unsubSnapshot) unsubSnapshot();
+    unsubSnapshot = col.onSnapshot({ includeMetadataChanges: true }, snapshot => {
       records = snapshot.docs.map(doc => doc.data());
       sortRecords();
       renderHistory();
@@ -1079,118 +1350,134 @@
       setSyncBadge('offline', 'Sin conexión');
     });
 
-    // Persistencia offline (registrada después del listener para no bloquear la conexión)
     db.enablePersistence({ synchronizeTabs: true }).catch(err => {
       if (err.code !== 'failed-precondition' && err.code !== 'unimplemented') {
         console.warn('enablePersistence:', err.code);
       }
     });
 
-    // Detectar cambios de red
     window.addEventListener('online',  () => setSyncBadge('loading', 'Reconectando…'));
     window.addEventListener('offline', () => setSyncBadge('offline', 'Sin conexión'));
   }
 
-  /* ────────────────────────── Sync badge ─────────────── */
+  /* ─────────────────────── Sync badge ─────────────────── */
   function updateSyncBadge(meta) {
-    if (meta.hasPendingWrites) {
-      setSyncBadge('pending', 'Guardando…');
-    } else if (meta.fromCache) {
-      setSyncBadge('offline', 'Sin conexión');
-    } else {
-      setSyncBadge('ok', 'Sincronizado');
-    }
+    if (meta.hasPendingWrites)   setSyncBadge('pending', 'Guardando…');
+    else if (meta.fromCache)     setSyncBadge('offline', 'Sin conexión');
+    else                         setSyncBadge('ok', 'Sincronizado');
   }
 
   function setSyncBadge(state, label) {
     const el = document.getElementById('sync-status');
-    el.className  = `sync-pill sync-${state}`;
+    el.className   = `sync-pill sync-${state}`;
     el.textContent = label;
   }
 
-  /* ────────────────────────── Helpers ────────────────── */
-  function toISO(d) { return d.toISOString().split('T')[0]; }
-
-  function fmtDate(iso) {
-    const [y, m, d] = iso.split('-');
-    return `${d}/${m}/${y}`;
-  }
-
-  function euro(v) {
-    return '€' + Math.abs(v).toFixed(2).replace('.', ',');
-  }
-
-  // Compatibilidad: registros antiguos sólo tienen `efectivo`
-  function getTotalCash(r) {
-    if (r.totalCash !== undefined) return r.totalCash;
-    return r.efectivo || 0;
-  }
+  /* ─────────────────────── Helpers ────────────────────── */
+  function toISO(d)    { return d.toISOString().split('T')[0]; }
+  function fmtDate(iso){ const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}`; }
+  function euro(v)     { return '€' + Math.abs(v).toFixed(2).replace('.', ','); }
+  function setText(id, v) { const el = document.getElementById(id); if (el) el.textContent = v; }
+  function escHtml(s)  { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
   function sortRecords() {
     records.sort((a, b) =>
       a.fecha.localeCompare(b.fecha) || a.horario.localeCompare(b.horario));
   }
 
-  /* ────────────────────────── Calculation ────────────── */
-  function compute(civ, via, web, cash) {
-    const civFee  = civ * RATES.civitatis;
-    const viaFee  = via * RATES.viabam;
-    const webFee  = web * RATES.web;
-    const totalComm = civFee + viaFee + webFee;
-    return {
-      totalPax:     civ + via + web,
-      civitatisFee: civFee,
-      viabamFee:    viaFee,
-      webFee,
-      totalComm,
-      netGain:      cash - totalComm
-    };
+  /* ── Compatibilidad con registros en formato anterior ── */
+  function getRecordPax(r) {
+    if (r.pax) return r.pax;
+    return { 'Civitatis': r.civitatis||0, 'Viabam': r.viabam||0, 'Web': r.web||0 };
   }
 
-  /* ────────────────────────── Preview ────────────────── */
-  function calcPreview() {
-    const civ  = int('civitatis');
-    const via  = int('viabam');
-    const web  = int('web');
-    const cash = flt('efectivo') + flt('revolut') + flt('sumup');
-    const c    = compute(civ, via, web, cash);
+  function getRecordFees(r) {
+    if (r.fees) return r.fees;
+    return { 'Civitatis': r.civitatisFee||0, 'Viabam': r.viabamFee||0, 'Web': r.webFee||0 };
+  }
 
-    setText('pv-pax',  c.totalPax);
-    setText('pv-civ',  euro(c.civitatisFee));
-    setText('pv-via',  euro(c.viabamFee));
-    setText('pv-web',  euro(c.webFee));
-    setText('pv-comm', euro(c.totalComm));
+  function getRecordPayments(r) {
+    if (r.payments) return r.payments;
+    const p = {};
+    if (r.efectivo||0) p['Efectivo'] = r.efectivo;
+    if (r.revolut||0)  p['Revolut']  = r.revolut;
+    if (r.sumup||0)    p['Sumup']    = r.sumup;
+    return p;
+  }
+
+  function getTotalCash(r) {
+    if (r.totalCash !== undefined) return r.totalCash;
+    return r.efectivo || 0;
+  }
+
+  /* ─────────────────────── Cálculo ────────────────────── */
+  function compute(paxObj) {
+    let totalPax = 0, totalComm = 0;
+    const fees = {};
+    userConfig.platforms.forEach(p => {
+      const pax = paxObj[p.name] || 0;
+      const fee = pax * p.rate;
+      fees[p.name] = fee;
+      totalPax  += pax;
+      totalComm += fee;
+    });
+    return { totalPax, fees, totalComm };
+  }
+
+  /* ─────────────────────── Preview ────────────────────── */
+  function calcPreview() {
+    const paxObj = {};
+    userConfig.platforms.forEach((p, i) => {
+      paxObj[p.name] = parseInt(document.getElementById(`pax-${i}`)?.value) || 0;
+    });
+
+    let cash = 0;
+    userConfig.paymentMethods.forEach((m, i) => {
+      cash += parseFloat(document.getElementById(`pay-${i}`)?.value) || 0;
+    });
+
+    const { totalPax, fees, totalComm } = compute(paxObj);
+    const netGain = cash - totalComm;
+
+    setText('pv-pax', totalPax);
+    userConfig.platforms.forEach((p, i) => setText(`pv-plat-${i}`, euro(fees[p.name] || 0)));
+    setText('pv-comm', euro(totalComm));
     setText('pv-cash', euro(cash));
 
     const netEl = document.getElementById('pv-net');
-    netEl.textContent = euro(c.netGain);
-    netEl.className   = 'total-val ' + (c.netGain >= 0 ? 'c-ok' : 'c-err');
+    if (netEl) {
+      netEl.textContent = euro(netGain);
+      netEl.className   = 'total-val ' + (netGain >= 0 ? 'c-ok' : 'c-err');
+    }
   }
 
-  function int(id) { return parseInt(document.getElementById(id).value) || 0; }
-  function flt(id) { return parseFloat(document.getElementById(id).value) || 0; }
-  function setText(id, v) { document.getElementById(id).textContent = v; }
-
-  /* ────────────────────────── Save new ───────────────── */
+  /* ─────────────────────── Guardar registro ───────────── */
   async function guardarRegistro() {
-    const fecha    = document.getElementById('fecha').value;
-    const horario  = document.getElementById('horario').value;
-    const civ      = int('civitatis');
-    const via      = int('viabam');
-    const web      = int('web');
-    const efectivo = flt('efectivo');
-    const revolut  = flt('revolut');
-    const sumup    = flt('sumup');
-    const cash     = efectivo + revolut + sumup;
+    const fecha   = document.getElementById('fecha').value;
+    const horario = document.getElementById('horario').value;
+    if (!fecha) { toast('Seleccioná una fecha', 'err'); return; }
 
-    if (!fecha) { toast('Selecciona una fecha', 'err'); return; }
+    const paxObj = {};
+    userConfig.platforms.forEach((p, i) => {
+      paxObj[p.name] = parseInt(document.getElementById(`pax-${i}`)?.value) || 0;
+    });
 
-    const id     = Date.now();
+    const paymentsObj = {};
+    let totalCash = 0;
+    userConfig.paymentMethods.forEach((m, i) => {
+      const v = parseFloat(document.getElementById(`pay-${i}`)?.value) || 0;
+      paymentsObj[m] = v;
+      totalCash += v;
+    });
+
+    const { totalPax, fees, totalComm } = compute(paxObj);
+    const netGain = totalCash - totalComm;
+    const id      = Date.now();
+
     const record = {
       id, fecha, horario,
-      civitatis: civ, viabam: via, web,
-      efectivo, revolut, sumup, totalCash: cash,
-      ...compute(civ, via, web, cash)
+      pax: paxObj, fees, payments: paymentsObj,
+      totalPax, totalComm, totalCash, netGain
     };
 
     try {
@@ -1204,18 +1491,20 @@
   }
 
   function resetForm() {
-    document.getElementById('fecha').value     = toISO(new Date());
-    document.getElementById('horario').value   = 'SM 10:30';
-    document.getElementById('civitatis').value = 0;
-    document.getElementById('viabam').value    = 0;
-    document.getElementById('web').value       = 0;
-    document.getElementById('efectivo').value  = 0;
-    document.getElementById('revolut').value   = 0;
-    document.getElementById('sumup').value     = 0;
+    document.getElementById('fecha').value   = toISO(new Date());
+    document.getElementById('horario').value = 'SM 10:30';
+    userConfig.platforms.forEach((p, i) => {
+      const el = document.getElementById(`pax-${i}`);
+      if (el) el.value = 0;
+    });
+    userConfig.paymentMethods.forEach((m, i) => {
+      const el = document.getElementById(`pay-${i}`);
+      if (el) el.value = 0;
+    });
     calcPreview();
   }
 
-  /* ────────────────────────── History ────────────────── */
+  /* ─────────────────────── Historial ──────────────────── */
   function shiftMonth(delta) {
     curMonth += delta;
     if (curMonth > 11) { curMonth = 0;  curYear++; }
@@ -1225,10 +1514,8 @@
 
   function renderHistory() {
     setText('month-label', `${MONTHS[curMonth]} ${curYear}`);
-
     const pfx      = `${curYear}-${String(curMonth + 1).padStart(2, '0')}`;
     const filtered = records.filter(r => r.fecha.startsWith(pfx));
-
     renderSummary(filtered);
     renderTable(filtered);
   }
@@ -1244,80 +1531,68 @@
     }, { tours: 0, pax: 0, comm: 0, cash: 0, net: 0 });
 
     document.getElementById('summary-grid').innerHTML = `
-      <div class="sum-card">
-        <div class="sum-val c-acc">${s.tours}</div>
-        <div class="sum-lbl">Tours</div>
-      </div>
-      <div class="sum-card">
-        <div class="sum-val c-acc">${s.pax}</div>
-        <div class="sum-lbl">PAX total</div>
-      </div>
-      <div class="sum-card">
-        <div class="sum-val c-err">${euro(s.comm)}</div>
-        <div class="sum-lbl">Comisiones</div>
-      </div>
-      <div class="sum-card">
-        <div class="sum-val">${euro(s.cash)}</div>
-        <div class="sum-lbl">Efectivo</div>
-      </div>
-      <div class="sum-card">
-        <div class="sum-val ${s.net >= 0 ? 'c-ok' : 'c-err'}">${euro(s.net)}</div>
-        <div class="sum-lbl">Ganancia neta</div>
-      </div>
+      <div class="sum-card"><div class="sum-val c-acc">${s.tours}</div><div class="sum-lbl">Tours</div></div>
+      <div class="sum-card"><div class="sum-val c-acc">${s.pax}</div><div class="sum-lbl">PAX total</div></div>
+      <div class="sum-card"><div class="sum-val c-err">${euro(s.comm)}</div><div class="sum-lbl">Comisiones</div></div>
+      <div class="sum-card"><div class="sum-val">${euro(s.cash)}</div><div class="sum-lbl">Total cobros</div></div>
+      <div class="sum-card"><div class="sum-val ${s.net >= 0 ? 'c-ok' : 'c-err'}">${euro(s.net)}</div><div class="sum-lbl">Ganancia neta</div></div>
     `;
   }
 
   function renderTable(list) {
     const tbody = document.getElementById('hist-body');
     const tfoot = document.getElementById('hist-foot');
+    const thead = document.getElementById('hist-head');
+
+    const platCols = userConfig.platforms.map(p => `<th>${escHtml(p.name)}</th>`).join('');
+    thead.innerHTML = `<tr><th>Fecha</th><th>Horario</th><th>PAX</th>${platCols}<th>Comisiones</th><th>Cobros</th><th>Neta</th><th></th></tr>`;
+
+    const numCols = 4 + userConfig.platforms.length + 3;
 
     if (list.length === 0) {
-      tbody.innerHTML = `
-        <tr><td colspan="10">
-          <div class="empty-state">
-            <div class="empty-icon">📋</div>
-            <div class="empty-msg">Sin registros para este mes</div>
-          </div>
-        </td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="${numCols}"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-msg">Sin registros para este mes</div></div></td></tr>`;
       tfoot.innerHTML = '';
       return;
     }
 
-    tbody.innerHTML = list.map(r => `
-      <tr>
-        <td>${fmtDate(r.fecha)}</td>
+    tbody.innerHTML = list.map(r => {
+      const paxObj      = getRecordPax(r);
+      const feesObj     = getRecordFees(r);
+      const paymentsObj = getRecordPayments(r);
+      const totalCash   = getTotalCash(r);
+
+      const platCells = userConfig.platforms.map((p, i) => `
         <td>
-          <span class="badge ${r.horario.includes('10') ? 'badge-am' : 'badge-pm'}">
-            ${r.horario}
-          </span>
+          <span style="color:${PLAT_COLORS[i % PLAT_COLORS.length]}">${paxObj[p.name] || 0}</span>
+          <span class="sub"> ${euro(feesObj[p.name] || 0)}</span>
         </td>
-        <td><strong>${r.totalPax}</strong></td>
-        <td>
-          <span class="c-civ">${r.civitatis}</span>
-          <span class="sub"> ${euro(r.civitatisFee)}</span>
-        </td>
-        <td>
-          <span class="c-via">${r.viabam}</span>
-          <span class="sub"> ${euro(r.viabamFee)}</span>
-        </td>
-        <td>
-          <span class="c-web">${r.web}</span>
-          <span class="sub"> ${euro(r.webFee)}</span>
-        </td>
-        <td class="c-err"><strong>${euro(r.totalComm)}</strong></td>
-        <td>
-          ${euro(getTotalCash(r))}
-          ${(r.revolut || r.sumup) ? `<br><span class="sub">Ef ${euro(r.efectivo||0)} · Rv ${euro(r.revolut||0)} · Su ${euro(r.sumup||0)}</span>` : ''}
-        </td>
-        <td class="${r.netGain >= 0 ? 'c-ok' : 'c-err'}"><strong>${euro(r.netGain)}</strong></td>
-        <td>
-          <div class="td-actions">
-            <button class="btn btn-ghost btn-sm" onclick="openEdit(${r.id})">Editar</button>
-            <button class="btn btn-icon" onclick="deleteRecord(${r.id})" title="Eliminar">×</button>
-          </div>
-        </td>
-      </tr>
-    `).join('');
+      `).join('');
+
+      const payEntries   = Object.entries(paymentsObj).filter(([,v]) => v > 0);
+      const payDetails   = payEntries.map(([k,v]) => `${k.slice(0,2)} ${euro(v)}`).join(' · ');
+      const hasMultiPay  = payEntries.length > 1;
+
+      return `
+        <tr>
+          <td>${fmtDate(r.fecha)}</td>
+          <td><span class="badge ${r.horario.includes('10') ? 'badge-am' : 'badge-pm'}">${r.horario}</span></td>
+          <td><strong>${r.totalPax}</strong></td>
+          ${platCells}
+          <td class="c-err"><strong>${euro(r.totalComm)}</strong></td>
+          <td>
+            ${euro(totalCash)}
+            ${hasMultiPay ? `<br><span class="sub">${payDetails}</span>` : ''}
+          </td>
+          <td class="${r.netGain >= 0 ? 'c-ok' : 'c-err'}"><strong>${euro(r.netGain)}</strong></td>
+          <td>
+            <div class="td-actions">
+              <button class="btn btn-ghost btn-sm" onclick="openEdit(${r.id})">Editar</button>
+              <button class="btn btn-icon" onclick="deleteRecord(${r.id})" title="Eliminar">×</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
 
     const s = list.reduce((a, r) => {
       a.pax  += r.totalPax;
@@ -1327,11 +1602,12 @@
       return a;
     }, { pax: 0, comm: 0, cash: 0, net: 0 });
 
+    const emptyPlatCols = userConfig.platforms.map(() => '<td>—</td>').join('');
     tfoot.innerHTML = `
       <tr>
         <td colspan="2">TOTAL MES</td>
         <td>${s.pax}</td>
-        <td colspan="3">—</td>
+        ${emptyPlatCols}
         <td class="c-err">${euro(s.comm)}</td>
         <td>${euro(s.cash)}</td>
         <td class="${s.net >= 0 ? 'c-ok' : 'c-err'}">${euro(s.net)}</td>
@@ -1340,7 +1616,7 @@
     `;
   }
 
-  /* ────────────────────────── Edit ───────────────────── */
+  /* ─────────────────────── Editar ─────────────────────── */
   function openEdit(id) {
     const r = records.find(x => x.id === id);
     if (!r) return;
@@ -1348,33 +1624,47 @@
 
     document.getElementById('e-fecha').value   = r.fecha;
     document.getElementById('e-horario').value = r.horario;
-    document.getElementById('e-civ').value     = r.civitatis;
-    document.getElementById('e-via').value     = r.viabam;
-    document.getElementById('e-web').value     = r.web;
-    document.getElementById('e-cash').value    = r.efectivo || 0;
-    document.getElementById('e-revolut').value = r.revolut  || 0;
-    document.getElementById('e-sumup').value   = r.sumup    || 0;
+
+    const paxObj      = getRecordPax(r);
+    const paymentsObj = getRecordPayments(r);
+
+    userConfig.platforms.forEach((p, i) => {
+      const el = document.getElementById(`e-pax-${i}`);
+      if (el) el.value = paxObj[p.name] || 0;
+    });
+    userConfig.paymentMethods.forEach((m, i) => {
+      const el = document.getElementById(`e-pay-${i}`);
+      if (el) el.value = paymentsObj[m] || 0;
+    });
 
     document.getElementById('overlay').classList.add('open');
   }
 
   async function saveEdit() {
-    const fecha    = document.getElementById('e-fecha').value;
-    const horario  = document.getElementById('e-horario').value;
-    const civ      = parseInt(document.getElementById('e-civ').value)       || 0;
-    const via      = parseInt(document.getElementById('e-via').value)       || 0;
-    const web      = parseInt(document.getElementById('e-web').value)       || 0;
-    const efectivo = parseFloat(document.getElementById('e-cash').value)    || 0;
-    const revolut  = parseFloat(document.getElementById('e-revolut').value) || 0;
-    const sumup    = parseFloat(document.getElementById('e-sumup').value)   || 0;
-    const cash     = efectivo + revolut + sumup;
+    const fecha   = document.getElementById('e-fecha').value;
+    const horario = document.getElementById('e-horario').value;
+
+    const paxObj = {};
+    userConfig.platforms.forEach((p, i) => {
+      paxObj[p.name] = parseInt(document.getElementById(`e-pax-${i}`)?.value) || 0;
+    });
+
+    const paymentsObj = {};
+    let totalCash = 0;
+    userConfig.paymentMethods.forEach((m, i) => {
+      const v = parseFloat(document.getElementById(`e-pay-${i}`)?.value) || 0;
+      paymentsObj[m] = v;
+      totalCash += v;
+    });
+
+    const { totalPax, fees, totalComm } = compute(paxObj);
+    const netGain = totalCash - totalComm;
 
     const updated = {
       id: editingId,
       fecha, horario,
-      civitatis: civ, viabam: via, web,
-      efectivo, revolut, sumup, totalCash: cash,
-      ...compute(civ, via, web, cash)
+      pax: paxObj, fees, payments: paymentsObj,
+      totalPax, totalComm, totalCash, netGain
     };
 
     try {
@@ -1396,7 +1686,7 @@
     if (e.target === document.getElementById('overlay')) closeModal();
   }
 
-  /* ────────────────────────── Delete ─────────────────── */
+  /* ─────────────────────── Eliminar ───────────────────── */
   async function deleteRecord(id) {
     if (!confirm('¿Eliminar este registro?')) return;
     try {
@@ -1408,46 +1698,7 @@
     }
   }
 
-  /* ────────────────────────── CSV Export ─────────────── */
-  function exportCSV() {
-    const pfx      = `${curYear}-${String(curMonth + 1).padStart(2, '0')}`;
-    const filtered = records.filter(r => r.fecha.startsWith(pfx));
-
-    if (!filtered.length) { toast('No hay datos este mes', 'warn'); return; }
-
-    const heads = [
-      'Fecha','Horario','PAX Total',
-      'Civitatis PAX','Civitatis €',
-      'Viabam PAX','Viabam €',
-      'Web PAX','Web €',
-      'Total Comisiones','Efectivo','Revolut','Sumup','Total Cobros','Ganancia Neta'
-    ];
-
-    const rows = filtered.map(r => [
-      r.fecha, r.horario, r.totalPax,
-      r.civitatis,  r.civitatisFee.toFixed(2),
-      r.viabam,     r.viabamFee.toFixed(2),
-      r.web,        r.webFee.toFixed(2),
-      r.totalComm.toFixed(2),
-      (r.efectivo||0).toFixed(2),
-      (r.revolut||0).toFixed(2),
-      (r.sumup||0).toFixed(2),
-      getTotalCash(r).toFixed(2),
-      r.netGain.toFixed(2)
-    ]);
-
-    const csv  = [heads, ...rows].map(r => r.join(';')).join('\r\n');
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
-    a.download = `itaka_comisiones_${pfx}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast('CSV exportado');
-  }
-
-  /* ────────────────────────── History mode tabs ──────── */
+  /* ─────────────────────── Modo historial ─────────────── */
   function setHistMode(mode) {
     document.querySelectorAll('.hist-tab').forEach(b => b.classList.remove('active'));
     document.querySelector(`.hist-tab[onclick="setHistMode('${mode}')"]`).classList.add('active');
@@ -1455,78 +1706,72 @@
     document.getElementById('hist-periodo').style.display = mode === 'periodo' ? '' : 'none';
   }
 
-  /* ────────────────────────── Period filter ───────────── */
-  let periodoFiltered = [];
-
+  /* ─────────────────────── Período ────────────────────── */
   function aplicarFiltro() {
     const desde = document.getElementById('p-desde').value;
     const hasta = document.getElementById('p-hasta').value;
-
-    if (!desde || !hasta) { toast('Seleccioná ambas fechas', 'warn'); return; }
-    if (desde > hasta)    { toast('La fecha inicial debe ser anterior a la final', 'err'); return; }
+    if (!desde || !hasta)  { toast('Seleccioná ambas fechas', 'warn'); return; }
+    if (desde > hasta)     { toast('La fecha inicial debe ser anterior a la final', 'err'); return; }
 
     periodoFiltered = records.filter(r => r.fecha >= desde && r.fecha <= hasta);
-
     document.getElementById('periodo-results').style.display = '';
     renderPeriodo(periodoFiltered, desde, hasta);
   }
 
   function renderPeriodo(list, desde, hasta) {
-    // Info bar
     const count = list.length;
     document.getElementById('periodo-info').innerHTML =
       `Período: <strong>${fmtDate(desde)}</strong> → <strong>${fmtDate(hasta)}</strong>
        &nbsp;·&nbsp; <strong>${count}</strong> tour${count !== 1 ? 's' : ''}`;
 
-    // Breakdown por origen
-    const s = list.reduce((a, r) => {
-      a.civComm  += r.civitatisFee;
-      a.viaComm  += r.viabamFee;
-      a.webComm  += r.webFee;
-      a.total    += r.totalComm;
-      a.efectivo += (r.efectivo || 0);
-      a.revolut  += (r.revolut  || 0);
-      a.sumup    += (r.sumup    || 0);
-      a.cash     += getTotalCash(r);
-      a.net      += r.netGain;
-      return a;
-    }, { civComm: 0, viaComm: 0, webComm: 0, total: 0, efectivo: 0, revolut: 0, sumup: 0, cash: 0, net: 0 });
+    // Acumular totales dinámicamente
+    const platComm = {};
+    userConfig.platforms.forEach(p => platComm[p.name] = 0);
+    const payTotals = {};
+    userConfig.paymentMethods.forEach(m => payTotals[m] = 0);
+    let totalComm = 0, totalCash = 0, netTotal = 0;
+
+    list.forEach(r => {
+      const feesObj     = getRecordFees(r);
+      const paymentsObj = getRecordPayments(r);
+      userConfig.platforms.forEach(p => {
+        platComm[p.name] = (platComm[p.name] || 0) + (feesObj[p.name] || 0);
+      });
+      userConfig.paymentMethods.forEach(m => {
+        payTotals[m] = (payTotals[m] || 0) + (paymentsObj[m] || 0);
+      });
+      totalComm += r.totalComm;
+      totalCash += getTotalCash(r);
+      netTotal  += r.netGain;
+    });
+
+    const platCards = userConfig.platforms.map((p, i) => `
+      <div class="breakdown-card">
+        <div class="breakdown-val" style="color:${PLAT_COLORS[i % PLAT_COLORS.length]}">${euro(platComm[p.name] || 0)}</div>
+        <div class="breakdown-lbl">${escHtml(p.name)}</div>
+      </div>
+    `).join('');
+
+    const payCards = userConfig.paymentMethods.map(m => `
+      <div class="breakdown-card">
+        <div class="breakdown-val">${euro(payTotals[m] || 0)}</div>
+        <div class="breakdown-lbl">${escHtml(m)}</div>
+      </div>
+    `).join('');
 
     document.getElementById('breakdown-grid').innerHTML = `
-      <div class="breakdown-card">
-        <div class="breakdown-val c-civ">${euro(s.civComm)}</div>
-        <div class="breakdown-lbl">Civitatis</div>
-      </div>
-      <div class="breakdown-card">
-        <div class="breakdown-val c-via">${euro(s.viaComm)}</div>
-        <div class="breakdown-lbl">Viabam</div>
-      </div>
-      <div class="breakdown-card">
-        <div class="breakdown-val c-web">${euro(s.webComm)}</div>
-        <div class="breakdown-lbl">Web</div>
-      </div>
+      ${platCards}
       <div class="breakdown-card" style="border-color:var(--danger);background:rgba(239,68,68,.04)">
-        <div class="breakdown-val c-err">${euro(s.total)}</div>
+        <div class="breakdown-val c-err">${euro(totalComm)}</div>
         <div class="breakdown-lbl">Total comisiones</div>
       </div>
+      ${payCards}
       <div class="breakdown-card">
-        <div class="breakdown-val">${euro(s.efectivo)}</div>
-        <div class="breakdown-lbl">Efectivo</div>
-      </div>
-      <div class="breakdown-card">
-        <div class="breakdown-val">${euro(s.revolut)}</div>
-        <div class="breakdown-lbl">Revolut</div>
-      </div>
-      <div class="breakdown-card">
-        <div class="breakdown-val">${euro(s.sumup)}</div>
-        <div class="breakdown-lbl">Sumup</div>
-      </div>
-      <div class="breakdown-card">
-        <div class="breakdown-val">${euro(s.cash)}</div>
+        <div class="breakdown-val">${euro(totalCash)}</div>
         <div class="breakdown-lbl">Total cobros</div>
       </div>
       <div class="breakdown-card">
-        <div class="breakdown-val ${s.net >= 0 ? 'c-ok' : 'c-err'}">${euro(s.net)}</div>
+        <div class="breakdown-val ${netTotal >= 0 ? 'c-ok' : 'c-err'}">${euro(netTotal)}</div>
         <div class="breakdown-lbl">Ganancia neta</div>
       </div>
     `;
@@ -1534,97 +1779,117 @@
     // Tabla del período
     const tbody = document.getElementById('periodo-body');
     const tfoot = document.getElementById('periodo-foot');
+    const thead = document.getElementById('periodo-head');
+
+    const platHeaders = userConfig.platforms.map(p => `<th>${escHtml(p.name)}</th>`).join('');
+    thead.innerHTML = `<tr><th>Fecha</th><th>Horario</th><th>PAX</th>${platHeaders}<th>Comisiones</th><th>Cobros</th><th>Neta</th></tr>`;
+
+    const numCols = 3 + userConfig.platforms.length + 3;
 
     if (list.length === 0) {
-      tbody.innerHTML = `
-        <tr><td colspan="9">
-          <div class="empty-state">
-            <div class="empty-icon">📋</div>
-            <div class="empty-msg">Sin registros en este período</div>
-          </div>
-        </td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="${numCols}"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-msg">Sin registros en este período</div></div></td></tr>`;
       tfoot.innerHTML = '';
       return;
     }
 
-    tbody.innerHTML = list.map(r => `
-      <tr>
-        <td>${fmtDate(r.fecha)}</td>
-        <td><span class="badge ${r.horario.includes('10') ? 'badge-am' : 'badge-pm'}">${r.horario}</span></td>
-        <td><strong>${r.totalPax}</strong></td>
-        <td><span class="c-civ">${r.civitatis}</span> <span class="sub">${euro(r.civitatisFee)}</span></td>
-        <td><span class="c-via">${r.viabam}</span> <span class="sub">${euro(r.viabamFee)}</span></td>
-        <td><span class="c-web">${r.web}</span> <span class="sub">${euro(r.webFee)}</span></td>
-        <td class="c-err"><strong>${euro(r.totalComm)}</strong></td>
-        <td>
-          ${euro(getTotalCash(r))}
-          ${(r.revolut || r.sumup) ? `<br><span class="sub">Ef ${euro(r.efectivo||0)} · Rv ${euro(r.revolut||0)} · Su ${euro(r.sumup||0)}</span>` : ''}
-        </td>
-        <td class="${r.netGain >= 0 ? 'c-ok' : 'c-err'}"><strong>${euro(r.netGain)}</strong></td>
-      </tr>
-    `).join('');
+    tbody.innerHTML = list.map(r => {
+      const paxObj      = getRecordPax(r);
+      const feesObj     = getRecordFees(r);
+      const paymentsObj = getRecordPayments(r);
+      const totalCashR  = getTotalCash(r);
 
+      const platCells = userConfig.platforms.map((p, i) => `
+        <td>
+          <span style="color:${PLAT_COLORS[i % PLAT_COLORS.length]}">${paxObj[p.name] || 0}</span>
+          <span class="sub"> ${euro(feesObj[p.name] || 0)}</span>
+        </td>
+      `).join('');
+
+      const payEntries  = Object.entries(paymentsObj).filter(([,v]) => v > 0);
+      const payDetails  = payEntries.map(([k,v]) => `${k.slice(0,2)} ${euro(v)}`).join(' · ');
+      const hasMultiPay = payEntries.length > 1;
+
+      return `
+        <tr>
+          <td>${fmtDate(r.fecha)}</td>
+          <td><span class="badge ${r.horario.includes('10') ? 'badge-am' : 'badge-pm'}">${r.horario}</span></td>
+          <td><strong>${r.totalPax}</strong></td>
+          ${platCells}
+          <td class="c-err"><strong>${euro(r.totalComm)}</strong></td>
+          <td>
+            ${euro(totalCashR)}
+            ${hasMultiPay ? `<br><span class="sub">${payDetails}</span>` : ''}
+          </td>
+          <td class="${r.netGain >= 0 ? 'c-ok' : 'c-err'}"><strong>${euro(r.netGain)}</strong></td>
+        </tr>
+      `;
+    }).join('');
+
+    const emptyPlatCols = userConfig.platforms.map(() => '<td>—</td>').join('');
     tfoot.innerHTML = `
       <tr>
         <td colspan="2">TOTAL PERÍODO</td>
         <td>—</td>
-        <td colspan="3">—</td>
-        <td class="c-err">${euro(s.total)}</td>
-        <td>${euro(s.cash)}</td>
-        <td class="${s.net >= 0 ? 'c-ok' : 'c-err'}">${euro(s.net)}</td>
+        ${emptyPlatCols}
+        <td class="c-err">${euro(totalComm)}</td>
+        <td>${euro(totalCash)}</td>
+        <td class="${netTotal >= 0 ? 'c-ok' : 'c-err'}">${euro(netTotal)}</td>
       </tr>
     `;
   }
 
-  /* ────────────────────────── CSV export período ──────── */
+  /* ─────────────────────── CSV Export ─────────────────── */
+  function exportCSV() {
+    const pfx      = `${curYear}-${String(curMonth + 1).padStart(2, '0')}`;
+    const filtered = records.filter(r => r.fecha.startsWith(pfx));
+    if (!filtered.length) { toast('No hay datos este mes', 'warn'); return; }
+    _downloadCSV(filtered, `itaka_comisiones_${pfx}.csv`);
+    toast('CSV exportado');
+  }
+
   function exportCSVPeriodo() {
     if (!periodoFiltered.length) { toast('No hay datos en el período', 'warn'); return; }
-
     const desde = document.getElementById('p-desde').value;
     const hasta = document.getElementById('p-hasta').value;
+    _downloadCSV(periodoFiltered, `itaka_periodo_${desde}_${hasta}.csv`);
+    toast('CSV exportado');
+  }
 
-    const heads = [
-      'Fecha','Horario','PAX Total',
-      'Civitatis PAX','Civitatis €',
-      'Viabam PAX','Viabam €',
-      'Web PAX','Web €',
-      'Total Comisiones','Efectivo','Revolut','Sumup','Total Cobros','Ganancia Neta'
-    ];
+  function _downloadCSV(list, filename) {
+    const platHeads = userConfig.platforms.flatMap(p => [`${p.name} PAX`, `${p.name} €`]);
+    const payHeads  = [...userConfig.paymentMethods, 'Total Cobros'];
+    const heads     = ['Fecha','Horario','PAX Total', ...platHeads, 'Total Comisiones', ...payHeads, 'Ganancia Neta'];
 
-    const rows = periodoFiltered.map(r => [
-      r.fecha, r.horario, r.totalPax,
-      r.civitatis,  r.civitatisFee.toFixed(2),
-      r.viabam,     r.viabamFee.toFixed(2),
-      r.web,        r.webFee.toFixed(2),
-      r.totalComm.toFixed(2),
-      (r.efectivo||0).toFixed(2),
-      (r.revolut||0).toFixed(2),
-      (r.sumup||0).toFixed(2),
-      getTotalCash(r).toFixed(2),
-      r.netGain.toFixed(2)
-    ]);
+    const rows = list.map(r => {
+      const paxObj      = getRecordPax(r);
+      const feesObj     = getRecordFees(r);
+      const paymentsObj = getRecordPayments(r);
+      const platCols    = userConfig.platforms.flatMap(p => [paxObj[p.name]||0, (feesObj[p.name]||0).toFixed(2)]);
+      const payCols     = [...userConfig.paymentMethods.map(m => (paymentsObj[m]||0).toFixed(2)), getTotalCash(r).toFixed(2)];
+      return [r.fecha, r.horario, r.totalPax, ...platCols, r.totalComm.toFixed(2), ...payCols, r.netGain.toFixed(2)];
+    });
 
     const csv  = [heads, ...rows].map(r => r.join(';')).join('\r\n');
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
     a.href     = url;
-    a.download = `itaka_periodo_${desde}_${hasta}.csv`;
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-    toast('CSV exportado');
   }
 
-  /* ────────────────────────── Navigation ─────────────── */
+  /* ─────────────────────── Navegación ─────────────────── */
   function switchView(name) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(`view-${name}`).classList.add('active');
     document.querySelector(`.nav-btn[onclick="switchView('${name}')"]`).classList.add('active');
     if (name === 'historial') renderHistory();
+    if (name === 'config')    renderConfigView();
   }
 
-  /* ────────────────────────── Toast ──────────────────── */
+  /* ─────────────────────── Toast ──────────────────────── */
   function toast(msg, type = 'ok') {
     const el = document.getElementById('toast');
     el.textContent = msg;
@@ -1637,25 +1902,29 @@
     el._t = setTimeout(() => el.classList.remove('show'), 2600);
   }
 
-  /* ────────────────────────── Boot ───────────────────── */
-  let appInited = false;
-
+  /* ─────────────────────── Boot ───────────────────────── */
   async function initApp() {
     const res    = await fetch('/firebase-config');
     const config = await res.json();
     firebase.initializeApp(config);
-    db  = firebase.firestore();
-    col = db.collection('registros');
+    db = firebase.firestore();
 
-    firebase.auth().onAuthStateChanged(user => {
+    firebase.auth().onAuthStateChanged(async user => {
       if (user) {
-        if (!appInited) { appInited = true; showApp(); }
+        if (!appInited) {
+          currentUser  = user;
+          col          = db.collection('users').doc(user.uid).collection('registros');
+          await loadUserConfig();
+          appInited    = true;
+          showApp();
+        }
       } else {
-        appInited = false;
+        appInited   = false;
+        currentUser = null;
         document.getElementById('login-screen').style.display = '';
         document.getElementById('app-header').style.display   = 'none';
         document.getElementById('app-main').style.display     = 'none';
-        setTimeout(() => document.getElementById('login-email').focus(), 100);
+        showLoginPanel();
       }
     });
   }
