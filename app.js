@@ -330,7 +330,12 @@ function updateSyncBadge(meta) {
 function setSyncBadge(state, label) {
   const el = document.getElementById('sync-status');
   el.className   = `sync-pill sync-${state}`;
-  el.textContent = label;
+  if (window.innerWidth <= 640) {
+    const short = { 'Sincronizado':'Sinc.', 'Guardando…':'Guard…', 'Sin conexión':'Offline', 'Conectando…':'···', 'Reconectando…':'···' };
+    el.textContent = short[label] || label;
+  } else {
+    el.textContent = label;
+  }
 }
 
 /* ─────────────────────── Helpers ────────────────────── */
