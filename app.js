@@ -12,7 +12,13 @@ const DEFAULT_CONFIG = {
     { name: 'Viabam',    rate: 2.5 },
     { name: 'Web',       rate: 2 }
   ],
-  paymentMethods: ['Efectivo', 'Revolut', 'Sumup']
+  paymentMethods: ['Efectivo', 'Revolut', 'Sumup'],
+  schedules: [
+    { tour: 'San Marco', time: '10:00' },
+    { tour: 'San Marco', time: '10:30' },
+    { tour: 'San Marco', time: '13:00' },
+    { tour: 'San Marco', time: '13:30' }
+  ]
 };
 
 /* ─────────────────────── Estado global ──────────────── */
@@ -129,6 +135,7 @@ async function loadUserConfig() {
       userConfig = {
         platforms:      (data.platforms      && data.platforms.length)      ? data.platforms      : DEFAULT_CONFIG.platforms,
         paymentMethods: (data.paymentMethods && data.paymentMethods.length) ? data.paymentMethods : DEFAULT_CONFIG.paymentMethods,
+        schedules:      (data.schedules      && data.schedules.length)      ? data.schedules      : DEFAULT_CONFIG.schedules,
         userName:       data.userName || ''
       };
     } else {
@@ -162,17 +169,27 @@ async function saveConfig() {
     if (name) paymentMethods.push(name);
   });
 
+  // Leer tours y horarios del DOM
+  const schedules = [];
+  document.querySelectorAll('.cfg-schedule-row').forEach(row => {
+    const tour = row.querySelector('.cfg-tour').value.trim();
+    const time = row.querySelector('.cfg-time').value.trim();
+    if (tour && time) schedules.push({ tour, time });
+  });
+
   if (platforms.length === 0)      { toast('Necesitás al menos una plataforma', 'err'); return; }
   if (paymentMethods.length === 0) { toast('Necesitás al menos un medio de pago', 'err'); return; }
+  if (schedules.length === 0)      { toast('Necesitás al menos un tour y horario', 'err'); return; }
 
   const userName = document.getElementById('cfg-name').value.trim();
 
   try {
-    userConfig = { platforms, paymentMethods, userName };
+    userConfig = { platforms, paymentMethods, schedules, userName };
     await db.collection('users').doc(currentUser.uid)
       .collection('config').doc('settings').set(userConfig);
     updateGreeting(userName);
     buildForms();
+    rebuildScheduleDropdowns();
     toast('Configuración guardada');
   } catch (e) {
     console.error(e);
@@ -190,6 +207,10 @@ function updateGreeting(name) {
 function renderConfigView() {
   document.getElementById('cfg-name').value = userConfig.userName || '';
 
+  const schedContainer = document.getElementById('cfg-schedules');
+  schedContainer.innerHTML = '';
+  userConfig.schedules.forEach(s => addScheduleRow(s.tour, s.time));
+
   const platContainer = document.getElementById('cfg-platforms');
   platContainer.innerHTML = '';
   userConfig.platforms.forEach(p => addPlatformRow(p.name, p.rate));
@@ -197,6 +218,17 @@ function renderConfigView() {
   const payContainer = document.getElementById('cfg-payments');
   payContainer.innerHTML = '';
   userConfig.paymentMethods.forEach(m => addPaymentRow(m));
+}
+
+function addScheduleRow(tour = '', time = '') {
+  const row = document.createElement('div');
+  row.className = 'config-item cfg-schedule-row';
+  row.innerHTML = `
+    <input type="text" class="cfg-tour" placeholder="Ej: San Marco" value="${escHtml(String(tour))}">
+    <input type="text" class="cfg-time" placeholder="10:00" value="${escHtml(String(time))}">
+    <button class="btn btn-icon" onclick="this.closest('.cfg-schedule-row').remove()" title="Eliminar">×</button>
+  `;
+  document.getElementById('cfg-schedules').appendChild(row);
 }
 
 function addPlatformRow(name = '', rate = '') {
@@ -224,6 +256,16 @@ function addPaymentRow(name = '') {
 function buildForms() {
   buildRegistroForm();
   buildEditModal();
+  rebuildScheduleDropdowns();
+}
+
+function rebuildScheduleDropdowns() {
+  const options = userConfig.schedules.map(s => {
+    const val = `${s.tour} ${s.time}`;
+    return `<option value="${escHtml(val)}">${escHtml(val)}</option>`;
+  }).join('');
+  document.getElementById('horario').innerHTML   = options;
+  document.getElementById('e-horario').innerHTML = options;
 }
 
 function buildRegistroForm() {
@@ -379,6 +421,45 @@ function getTotalCash(r) {
   return r.efectivo || 0;
 }
 
+function getRecordTour(r) {
+  if (r.tour) return r.tour;
+  // Registro viejo: "SM 10:00" → parsear, devolver todo menos la última parte
+  if (r.horario) {
+    const parts = r.horario.split(' ');
+    return parts.length > 1 ? parts.slice(0, -1).join(' ') : r.horario;
+  }
+  return '-';
+}
+
+function getRecordTime(r) {
+  if (r.time) return r.time;
+  // Registro viejo: "SM 10:00" → última parte
+  if (r.horario) {
+    const parts = r.horario.split(' ');
+    return parts.length > 1 ? parts[parts.length - 1] : '-';
+  }
+  return '-';
+}
+
+async function migrateOldRecords() {
+  try {
+    const snapshot = await col.get();
+    const toMigrate = snapshot.docs.filter(doc => !doc.data().tour);
+    if (!toMigrate.length) return;
+    const batch = db.batch();
+    toMigrate.forEach(doc => {
+      const horario = doc.data().horario || '';
+      const parts   = horario.split(' ');
+      const time    = parts.length > 1 ? parts[parts.length - 1] : '';
+      const tour    = parts.length > 1 ? parts.slice(0, -1).join(' ') : horario;
+      batch.update(doc.ref, { tour, time });
+    });
+    await batch.commit();
+  } catch (e) {
+    console.warn('migrateOldRecords:', e);
+  }
+}
+
 /* ─────────────────────── Cálculo ────────────────────── */
 function compute(paxObj) {
   let totalPax = 0, totalComm = 0;
@@ -422,9 +503,13 @@ function calcPreview() {
 
 /* ─────────────────────── Guardar registro ───────────── */
 async function guardarRegistro() {
-  const fecha   = document.getElementById('fecha').value;
-  const horario = document.getElementById('horario').value;
+  const fecha      = document.getElementById('fecha').value;
+  const horarioVal = document.getElementById('horario').value;
   if (!fecha) { toast('Seleccioná una fecha', 'err'); return; }
+
+  const sel  = userConfig.schedules.find(s => `${s.tour} ${s.time}` === horarioVal);
+  const tour = sel ? sel.tour : horarioVal;
+  const time = sel ? sel.time : '';
 
   const paxObj = {};
   userConfig.platforms.forEach((p, i) => {
@@ -444,7 +529,7 @@ async function guardarRegistro() {
   const id      = Date.now();
 
   const record = {
-    id, fecha, horario,
+    id, fecha, horario: horarioVal, tour, time,
     pax: paxObj, fees, payments: paymentsObj,
     totalPax, totalComm, totalCash, netGain
   };
@@ -461,7 +546,8 @@ async function guardarRegistro() {
 
 function resetForm() {
   document.getElementById('fecha').value   = toISO(new Date());
-  document.getElementById('horario').value = 'SM 10:30';
+  const firstOpt = document.querySelector('#horario option');
+  if (firstOpt) document.getElementById('horario').value = firstOpt.value;
   userConfig.platforms.forEach((p, i) => {
     const el = document.getElementById(`pax-${i}`);
     if (el) el.value = 0;
@@ -514,9 +600,9 @@ function renderTable(list) {
   const thead = document.getElementById('hist-head');
 
   const platCols = userConfig.platforms.map(p => `<th>${escHtml(p.name)}</th>`).join('');
-  thead.innerHTML = `<tr><th>Fecha</th><th>Horario</th><th>PAX</th>${platCols}<th>Comisiones</th><th>Cobros</th><th>Neta</th><th></th></tr>`;
+  thead.innerHTML = `<tr><th>Fecha</th><th>Tour</th><th>Horario</th><th>PAX</th>${platCols}<th>Comisiones</th><th>Cobros</th><th>Neta</th><th></th></tr>`;
 
-  const numCols = 4 + userConfig.platforms.length + 3;
+  const numCols = 5 + userConfig.platforms.length + 3;
 
   if (list.length === 0) {
     tbody.innerHTML = `<tr><td colspan="${numCols}"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-msg">Sin registros para este mes</div></div></td></tr>`;
@@ -541,10 +627,12 @@ function renderTable(list) {
     const payDetails   = payEntries.map(([k,v]) => `${k.slice(0,2)} ${euro(v)}`).join(' · ');
     const hasMultiPay  = payEntries.length > 1;
 
+    const isAM = (r.time || r.horario || '').includes('10');
     return `
       <tr>
         <td>${fmtDate(r.fecha)}</td>
-        <td><span class="badge ${r.horario.includes('10') ? 'badge-am' : 'badge-pm'}">${r.horario}</span></td>
+        <td class="td-tour">${escHtml(getRecordTour(r))}</td>
+        <td><span class="badge ${isAM ? 'badge-am' : 'badge-pm'}">${escHtml(getRecordTime(r))}</span></td>
         <td><strong>${r.totalPax}</strong></td>
         ${platCells}
         <td class="c-err"><strong>${euro(r.totalComm)}</strong></td>
@@ -574,7 +662,7 @@ function renderTable(list) {
   const emptyPlatCols = userConfig.platforms.map(() => '<td>—</td>').join('');
   tfoot.innerHTML = `
     <tr>
-      <td colspan="2">TOTAL MES</td>
+      <td colspan="3">TOTAL MES</td>
       <td>${s.pax}</td>
       ${emptyPlatCols}
       <td class="c-err">${euro(s.comm)}</td>
@@ -610,8 +698,12 @@ function openEdit(id) {
 }
 
 async function saveEdit() {
-  const fecha   = document.getElementById('e-fecha').value;
-  const horario = document.getElementById('e-horario').value;
+  const fecha      = document.getElementById('e-fecha').value;
+  const horarioVal = document.getElementById('e-horario').value;
+
+  const sel  = userConfig.schedules.find(s => `${s.tour} ${s.time}` === horarioVal);
+  const tour = sel ? sel.tour : horarioVal;
+  const time = sel ? sel.time : '';
 
   const paxObj = {};
   userConfig.platforms.forEach((p, i) => {
@@ -631,7 +723,7 @@ async function saveEdit() {
 
   const updated = {
     id: editingId,
-    fecha, horario,
+    fecha, horario: horarioVal, tour, time,
     pax: paxObj, fees, payments: paymentsObj,
     totalPax, totalComm, totalCash, netGain
   };
@@ -751,9 +843,9 @@ function renderPeriodo(list, desde, hasta) {
   const thead = document.getElementById('periodo-head');
 
   const platHeaders = userConfig.platforms.map(p => `<th>${escHtml(p.name)}</th>`).join('');
-  thead.innerHTML = `<tr><th>Fecha</th><th>Horario</th><th>PAX</th>${platHeaders}<th>Comisiones</th><th>Cobros</th><th>Neta</th></tr>`;
+  thead.innerHTML = `<tr><th>Fecha</th><th>Tour</th><th>Horario</th><th>PAX</th>${platHeaders}<th>Comisiones</th><th>Cobros</th><th>Neta</th></tr>`;
 
-  const numCols = 3 + userConfig.platforms.length + 3;
+  const numCols = 4 + userConfig.platforms.length + 3;
 
   if (list.length === 0) {
     tbody.innerHTML = `<tr><td colspan="${numCols}"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-msg">Sin registros en este período</div></div></td></tr>`;
@@ -778,10 +870,12 @@ function renderPeriodo(list, desde, hasta) {
     const payDetails  = payEntries.map(([k,v]) => `${k.slice(0,2)} ${euro(v)}`).join(' · ');
     const hasMultiPay = payEntries.length > 1;
 
+    const isAM = (r.time || r.horario || '').includes('10');
     return `
       <tr>
         <td>${fmtDate(r.fecha)}</td>
-        <td><span class="badge ${r.horario.includes('10') ? 'badge-am' : 'badge-pm'}">${r.horario}</span></td>
+        <td class="td-tour">${escHtml(getRecordTour(r))}</td>
+        <td><span class="badge ${isAM ? 'badge-am' : 'badge-pm'}">${escHtml(getRecordTime(r))}</span></td>
         <td><strong>${r.totalPax}</strong></td>
         ${platCells}
         <td class="c-err"><strong>${euro(r.totalComm)}</strong></td>
@@ -797,7 +891,7 @@ function renderPeriodo(list, desde, hasta) {
   const emptyPlatCols = userConfig.platforms.map(() => '<td>—</td>').join('');
   tfoot.innerHTML = `
     <tr>
-      <td colspan="2">TOTAL PERÍODO</td>
+      <td colspan="3">TOTAL PERÍODO</td>
       <td>—</td>
       ${emptyPlatCols}
       <td class="c-err">${euro(totalComm)}</td>
@@ -827,7 +921,7 @@ function exportCSVPeriodo() {
 function _downloadCSV(list, filename) {
   const platHeads = userConfig.platforms.flatMap(p => [`${p.name} PAX`, `${p.name} €`]);
   const payHeads  = [...userConfig.paymentMethods, 'Total Cobros'];
-  const heads     = ['Fecha','Horario','PAX Total', ...platHeads, 'Total Comisiones', ...payHeads, 'Ganancia Neta'];
+  const heads     = ['Fecha','Tour','Horario','PAX Total', ...platHeads, 'Total Comisiones', ...payHeads, 'Ganancia Neta'];
 
   const rows = list.map(r => {
     const paxObj      = getRecordPax(r);
@@ -835,7 +929,7 @@ function _downloadCSV(list, filename) {
     const paymentsObj = getRecordPayments(r);
     const platCols    = userConfig.platforms.flatMap(p => [paxObj[p.name]||0, (feesObj[p.name]||0).toFixed(2)]);
     const payCols     = [...userConfig.paymentMethods.map(m => (paymentsObj[m]||0).toFixed(2)), getTotalCash(r).toFixed(2)];
-    return [r.fecha, r.horario, r.totalPax, ...platCols, r.totalComm.toFixed(2), ...payCols, r.netGain.toFixed(2)];
+    return [r.fecha, getRecordTour(r), getRecordTime(r), r.totalPax, ...platCols, r.totalComm.toFixed(2), ...payCols, r.netGain.toFixed(2)];
   });
 
   const csv  = [heads, ...rows].map(r => r.join(';')).join('\r\n');
@@ -885,6 +979,7 @@ async function initApp() {
         currentUser  = user;
         col          = db.collection('users').doc(user.uid).collection('registros');
         await loadUserConfig();
+        migrateOldRecords();
         appInited    = true;
         showApp();
       }

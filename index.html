@@ -104,13 +104,8 @@
         </div>
 
         <div class="form-group">
-          <label>Horario</label>
-          <select id="horario">
-            <option value="SM 10:00">SM 10:00</option>
-            <option value="SM 10:30">SM 10:30</option>
-            <option value="SM 13:00">SM 13:00</option>
-            <option value="SM 13:30">SM 13:30</option>
-          </select>
+          <label>Tour</label>
+          <select id="horario"><!-- opciones generadas dinámicamente --></select>
         </div>
 
         <div class="form-group full">
@@ -237,6 +232,21 @@
 
       <hr class="divider">
 
+      <!-- Tours y horarios -->
+      <div class="config-section">
+        <div class="config-section-title">Mis tours y horarios</div>
+        <div class="config-section-desc">Definí qué tours hacés y en qué horarios. Aparecen como opciones al registrar.</div>
+        <div class="config-col-labels schedules">
+          <label>Tour</label>
+          <label>Horario</label>
+          <span></span>
+        </div>
+        <div class="config-list" id="cfg-schedules"></div>
+        <button class="config-add-btn" onclick="addScheduleRow()">+ Agregar tour / horario</button>
+      </div>
+
+      <hr class="divider">
+
       <!-- Plataformas -->
       <div class="config-section">
         <div class="config-section-title">Plataformas y tarifas de comisión</div>
@@ -280,13 +290,8 @@
         <input type="date" id="e-fecha">
       </div>
       <div class="form-group">
-        <label>Horario</label>
-        <select id="e-horario">
-          <option value="SM 10:00">SM 10:00</option>
-          <option value="SM 10:30">SM 10:30</option>
-          <option value="SM 13:00">SM 13:00</option>
-          <option value="SM 13:30">SM 13:30</option>
-        </select>
+        <label>Tour</label>
+        <select id="e-horario"><!-- opciones generadas dinámicamente --></select>
       </div>
       <div class="form-group full">
         <label>Pasajeros por origen</label>
