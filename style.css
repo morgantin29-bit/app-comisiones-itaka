@@ -799,6 +799,14 @@ tfoot td {
   }
 }
 
+/* ═══════════════ BOTÓN CON ÍCONO ════════════ */
+.btn-icon-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
 /* ═══════════════ PESTAÑA HOY ════════════════ */
 .hoy-empty-state {
   text-align: center;

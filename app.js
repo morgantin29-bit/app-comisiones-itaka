@@ -854,12 +854,11 @@ function showHoyPopup() {
   const today = new Date().toISOString().slice(0, 10);
   const list  = records.filter(r => r.fecha === today);
   const [, m, d] = today.split('-');
-  const dateLabel = `${d}/${m}`;
 
-  const lines = [];
+  const lines = [`📅 ${d}/${m} —`];
   list.forEach((r, idx) => {
     if (idx > 0) lines.push('');
-    lines.push(`${dateLabel} — ${getRecordTour(r)} ${getRecordTime(r)}`);
+    lines.push(`${getRecordTour(r)} ${getRecordTime(r)}`);
     const pax = getRecordPax(r);
     Object.entries(pax).forEach(([plat, n]) => {
       if (n > 0) lines.push(`${n} pax ${plat}`);
@@ -877,9 +876,9 @@ function closeHoyPopup() {
 function copyHoyText() {
   const text = document.getElementById('hoy-popup-text').textContent;
   navigator.clipboard.writeText(text).then(() => {
-    const btn = document.getElementById('btn-copy-hoy');
-    btn.textContent = '¡Copiado!';
-    setTimeout(() => { btn.textContent = 'Copiar para WhatsApp'; }, 2000);
+    const label = document.getElementById('btn-copy-hoy-label');
+    label.textContent = '¡Copiado!';
+    setTimeout(() => { label.textContent = 'Copiar para WhatsApp'; }, 2000);
   }).catch(() => toast('Error al copiar', 'err'));
 }
 
