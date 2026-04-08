@@ -137,9 +137,11 @@ Cada entrada tiene: nombre del tour + hora. En el dropdown de Registro se muestr
 - Tercer modo del historial; muestra solo los registros del día actual
 - Estado vacío si no hay tours registrados en el día
 - Resumen (tours, pax, comisiones, cobros, ganancia) + tabla sin columna Fecha
-- Botón "Exportar datos de hoy" → popup con resumen en texto plano
-- Solo aparecen plataformas con pax > 0 en el resumen del popup
-- Botón "Copiar para WhatsApp" copia al portapapeles; confirma con "¡Copiado!" por 2 segundos
+- Botón **"Exportar datos de hoy"** (con logo WhatsApp) → abre popup con resumen en texto plano
+- Formato del popup: fecha única al inicio (`📅 08/04 —`), luego cada tour con nombre + hora y pax por plataforma
+- Solo aparecen plataformas con pax > 0
+- Botón **"Copiar para WhatsApp"** (con logo WhatsApp) copia el texto al portapapeles; confirma con "¡Copiado!" por 2 segundos
+- Popup se cierra tocando el fondo o el botón "Cerrar"
 
 ### Vista Historial — Por período
 - Filtro libre por rango de fechas
@@ -276,7 +278,8 @@ Gris (conectando) → Naranja (guardando) → Verde (sincronizado) → Rojo (sin
 - **Pestaña "Hoy" en Historial:** tercer modo junto a "Por mes" y "Por período"
 - Filtra y muestra solo los registros del día actual (resumen + tabla sin columna Fecha)
 - Estado vacío: "Hoy no has registrado ningún tour todavía"
-- **Exportar datos de hoy:** botón que abre un popup con el resumen del día en formato texto
-- Formato del resumen: fecha corta (DD/MM), tour + horario, pax por plataforma — solo las plataformas con pax > 0 aparecen
-- **Copiar para WhatsApp:** botón dentro del popup que copia el texto al portapapeles; confirma con "¡Copiado!" durante 2 segundos
+- **Exportar datos de hoy** (con logo WhatsApp): abre popup con resumen del día en formato texto
+- Formato del popup: fecha única al inicio (`📅 08/04 —`), luego cada tour con nombre + hora y pax por plataforma separados; plataformas con 0 pax omitidas
+- **Copiar para WhatsApp** (con logo WhatsApp): copia el texto al portapapeles; confirma con "¡Copiado!" durante 2 segundos
 - Popup cierra tocando el fondo o el botón "Cerrar"
+- Logos WhatsApp: SVG inline en ambos botones — verde (#25D366) en "Exportar", color del botón en "Copiar"
