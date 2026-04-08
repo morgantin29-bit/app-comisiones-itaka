@@ -799,6 +799,70 @@ tfoot td {
   }
 }
 
+/* ═══════════════ PESTAÑA HOY ════════════════ */
+.hoy-empty-state {
+  text-align: center;
+  color: var(--muted);
+  padding: 48px 24px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* ═══════════════ POPUP HOY ══════════════════ */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 24px;
+}
+
+.popup-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 380px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.popup-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.popup-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.popup-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 /* ═══════════════ LOADING SCREEN ══════════════ */
 #loading-screen {
   position: fixed;

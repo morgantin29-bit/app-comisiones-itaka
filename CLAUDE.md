@@ -133,6 +133,14 @@ Cada entrada tiene: nombre del tour + hora. En el dropdown de Registro se muestr
 - Editar (modal slide-up en móvil) / Eliminar con confirmación
 - Exportar CSV (BOM UTF-8, separador `;`, compatible con Excel) — incluye Tour y Horario como columnas separadas
 
+### Vista Historial — Hoy
+- Tercer modo del historial; muestra solo los registros del día actual
+- Estado vacío si no hay tours registrados en el día
+- Resumen (tours, pax, comisiones, cobros, ganancia) + tabla sin columna Fecha
+- Botón "Exportar datos de hoy" → popup con resumen en texto plano
+- Solo aparecen plataformas con pax > 0 en el resumen del popup
+- Botón "Copiar para WhatsApp" copia al portapapeles; confirma con "¡Copiado!" por 2 segundos
+
 ### Vista Historial — Por período
 - Filtro libre por rango de fechas
 - Tarjetas de breakdown por plataforma y medio de pago
@@ -263,3 +271,12 @@ Gris (conectando) → Naranja (guardando) → Verde (sincronizado) → Rojo (sin
 - **Migración automática:** al iniciar sesión, `migrateOldRecords()` parsea registros con `horario: "SM HH:MM"` y les agrega `tour` y `time` en Firestore — sin intervención manual
 - **Nuevos helpers:** `getRecordTour(r)` / `getRecordTime(r)` con backward compat total
 - **Nuevo campo en config:** `schedules: [{ tour, time }]` en `users/{uid}/config/settings`
+
+### v1.8 — 08/04/2026
+- **Pestaña "Hoy" en Historial:** tercer modo junto a "Por mes" y "Por período"
+- Filtra y muestra solo los registros del día actual (resumen + tabla sin columna Fecha)
+- Estado vacío: "Hoy no has registrado ningún tour todavía"
+- **Exportar datos de hoy:** botón que abre un popup con el resumen del día en formato texto
+- Formato del resumen: fecha corta (DD/MM), tour + horario, pax por plataforma — solo las plataformas con pax > 0 aparecen
+- **Copiar para WhatsApp:** botón dentro del popup que copia el texto al portapapeles; confirma con "¡Copiado!" durante 2 segundos
+- Popup cierra tocando el fondo o el botón "Cerrar"

@@ -765,6 +765,122 @@ function setHistMode(mode) {
   document.querySelector(`.hist-tab[onclick="setHistMode('${mode}')"]`).classList.add('active');
   document.getElementById('hist-mes').style.display     = mode === 'mes'     ? '' : 'none';
   document.getElementById('hist-periodo').style.display = mode === 'periodo' ? '' : 'none';
+  document.getElementById('hist-hoy').style.display     = mode === 'hoy'     ? '' : 'none';
+  if (mode === 'hoy') renderHoy();
+}
+
+/* ─────────────────────── Hoy ────────────────────────── */
+function renderHoy() {
+  const today = new Date().toISOString().slice(0, 10);
+  const list  = records.filter(r => r.fecha === today);
+
+  const emptyEl   = document.getElementById('hoy-empty');
+  const contentEl = document.getElementById('hoy-content');
+
+  if (list.length === 0) {
+    emptyEl.style.display   = '';
+    contentEl.style.display = 'none';
+    return;
+  }
+  emptyEl.style.display   = 'none';
+  contentEl.style.display = '';
+
+  renderHoySummary(list);
+  renderHoyTable(list);
+}
+
+function renderHoySummary(list) {
+  const s = list.reduce((a, r) => {
+    a.tours++;
+    a.pax  += r.totalPax;
+    a.comm += r.totalComm;
+    a.cash += getTotalCash(r);
+    a.net  += r.netGain;
+    return a;
+  }, { tours: 0, pax: 0, comm: 0, cash: 0, net: 0 });
+
+  document.getElementById('hoy-summary-grid').innerHTML = `
+    <div class="sum-card"><div class="sum-val c-acc">${s.tours}</div><div class="sum-lbl">Tours</div></div>
+    <div class="sum-card"><div class="sum-val c-acc">${s.pax}</div><div class="sum-lbl">PAX total</div></div>
+    <div class="sum-card"><div class="sum-val c-err">${euro(s.comm)}</div><div class="sum-lbl">Comisiones</div></div>
+    <div class="sum-card"><div class="sum-val">${euro(s.cash)}</div><div class="sum-lbl">Total cobros</div></div>
+    <div class="sum-card"><div class="sum-val ${s.net >= 0 ? 'c-ok' : 'c-err'}">${euro(s.net)}</div><div class="sum-lbl">Ganancia neta</div></div>
+  `;
+}
+
+function renderHoyTable(list) {
+  const thead = document.getElementById('hoy-head');
+  const tbody = document.getElementById('hoy-body');
+
+  const platCols = userConfig.platforms.map(p => `<th>${escHtml(p.name)}</th>`).join('');
+  thead.innerHTML = `<th>Tour</th><th>Horario</th><th>PAX</th>${platCols}<th>Comisiones</th><th>Cobros</th><th>Neta</th>`;
+
+  tbody.innerHTML = list.map(r => {
+    const paxObj      = getRecordPax(r);
+    const feesObj     = getRecordFees(r);
+    const paymentsObj = getRecordPayments(r);
+    const totalCash   = getTotalCash(r);
+
+    const platCells = userConfig.platforms.map((p, i) => `
+      <td>
+        <span style="color:${PLAT_COLORS[i % PLAT_COLORS.length]}">${paxObj[p.name] || 0}</span>
+        <span class="sub"> ${euro(feesObj[p.name] || 0)}</span>
+      </td>
+    `).join('');
+
+    const payEntries  = Object.entries(paymentsObj).filter(([,v]) => v > 0);
+    const payDetails  = payEntries.map(([k,v]) => `${k.slice(0,2)} ${euro(v)}`).join(' · ');
+    const hasMultiPay = payEntries.length > 1;
+    const isAM        = (r.time || r.horario || '').includes('10');
+
+    return `
+      <tr>
+        <td class="td-tour">${escHtml(getRecordTour(r))}</td>
+        <td><span class="badge ${isAM ? 'badge-am' : 'badge-pm'}">${escHtml(getRecordTime(r))}</span></td>
+        <td><strong>${r.totalPax}</strong></td>
+        ${platCells}
+        <td class="c-err"><strong>${euro(r.totalComm)}</strong></td>
+        <td>
+          ${euro(totalCash)}
+          ${hasMultiPay ? `<br><span class="sub">${payDetails}</span>` : ''}
+        </td>
+        <td class="${r.netGain >= 0 ? 'c-ok' : 'c-err'}"><strong>${euro(r.netGain)}</strong></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function showHoyPopup() {
+  const today = new Date().toISOString().slice(0, 10);
+  const list  = records.filter(r => r.fecha === today);
+  const [, m, d] = today.split('-');
+  const dateLabel = `${d}/${m}`;
+
+  const lines = [];
+  list.forEach((r, idx) => {
+    if (idx > 0) lines.push('');
+    lines.push(`${dateLabel} — ${getRecordTour(r)} ${getRecordTime(r)}`);
+    const pax = getRecordPax(r);
+    Object.entries(pax).forEach(([plat, n]) => {
+      if (n > 0) lines.push(`${n} pax ${plat}`);
+    });
+  });
+
+  document.getElementById('hoy-popup-text').textContent = lines.join('\n');
+  document.getElementById('hoy-popup-overlay').style.display = '';
+}
+
+function closeHoyPopup() {
+  document.getElementById('hoy-popup-overlay').style.display = 'none';
+}
+
+function copyHoyText() {
+  const text = document.getElementById('hoy-popup-text').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('btn-copy-hoy');
+    btn.textContent = '¡Copiado!';
+    setTimeout(() => { btn.textContent = 'Copiar para WhatsApp'; }, 2000);
+  }).catch(() => toast('Error al copiar', 'err'));
 }
 
 /* ─────────────────────── Período ────────────────────── */

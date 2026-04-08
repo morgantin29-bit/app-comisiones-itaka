@@ -156,6 +156,7 @@
     <div class="hist-tabs">
       <button class="hist-tab active" onclick="setHistMode('mes')">Por mes</button>
       <button class="hist-tab"        onclick="setHistMode('periodo')">Por período</button>
+      <button class="hist-tab"        onclick="setHistMode('hoy')">Hoy</button>
     </div>
 
     <!-- ── Modo: por mes ── -->
@@ -211,6 +212,25 @@
             <tbody id="periodo-body"></tbody>
             <tfoot id="periodo-foot"></tfoot>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Modo: hoy ── -->
+    <div id="hist-hoy" style="display:none">
+      <div id="hoy-empty" class="hoy-empty-state" style="display:none">
+        Hoy no has registrado ningún tour todavía
+      </div>
+      <div id="hoy-content" style="display:none">
+        <div class="summary-grid" id="hoy-summary-grid"></div>
+        <div class="table-wrap">
+          <table class="hist-table">
+            <thead><tr id="hoy-head"></tr></thead>
+            <tbody id="hoy-body"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:16px">
+          <button class="btn btn-ghost" style="width:100%" onclick="showHoyPopup()">Exportar datos de hoy</button>
         </div>
       </div>
     </div>
@@ -305,6 +325,21 @@
     <div class="form-actions">
       <button class="btn btn-full" onclick="saveEdit()">Guardar cambios</button>
       <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ HOY POPUP ═══════════════════ -->
+<div id="hoy-popup-overlay" class="popup-overlay" style="display:none" onclick="closeHoyPopup()">
+  <div class="popup-card" onclick="event.stopPropagation()">
+    <div class="popup-header">
+      <h3 class="popup-title">Resumen del día</h3>
+      <button class="close-btn" onclick="closeHoyPopup()">×</button>
+    </div>
+    <pre id="hoy-popup-text" class="popup-text"></pre>
+    <div class="popup-actions">
+      <button class="btn btn-full" id="btn-copy-hoy" onclick="copyHoyText()">Copiar para WhatsApp</button>
+      <button class="btn btn-ghost btn-full" onclick="closeHoyPopup()">Cerrar</button>
     </div>
   </div>
 </div>
