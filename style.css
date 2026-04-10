@@ -708,13 +708,13 @@ tfoot td {
 
   /* Form */
   .form-grid { grid-template-columns: 1fr; gap: 14px; }
-  .pax-row { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; }
+  .pax-row { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
   .source-tag { font-size: 10px; }
 
   /* Preview */
   .preview { padding: 14px 12px; }
   .preview-row {
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 8px;
     margin-bottom: 10px;
   }
@@ -797,6 +797,13 @@ tfoot td {
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+}
+
+/* ── Pantallas muy pequeñas ──────────────────── */
+@media (max-width: 380px) {
+  .pax-row { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .preview-row { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .source-tag { font-size: 9px; }
 }
 
 /* ═══════════════ BOTÓN CON ÍCONO ════════════ */
