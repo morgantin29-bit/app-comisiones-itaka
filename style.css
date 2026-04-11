@@ -152,6 +152,20 @@ select option { background: var(--surface2); }
   flex-shrink: 0;
 }
 
+/* Captados — input único, no dinámico */
+.captados-wrap {
+  max-width: 140px;
+}
+.label-hint {
+  font-weight: 400;
+  color: var(--muted);
+  opacity: .8;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 11px;
+  margin-left: 4px;
+}
+
 /* ── Preview ──────────────────────────────────── */
 .preview {
   background: var(--surface2);
@@ -350,6 +364,13 @@ tfoot td {
   border-top: 2px solid var(--border);
   background: var(--surface);
   font-size: 13px;
+}
+
+/* Columna "Capt." — estrecha, centrada */
+.th-capt, .td-capt {
+  text-align: center;
+  width: 52px;
+  min-width: 52px;
 }
 
 .badge {

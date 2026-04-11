@@ -421,6 +421,10 @@ function getTotalCash(r) {
   return r.efectivo || 0;
 }
 
+function getRecordCaptados(r) {
+  return r.captados || 0;
+}
+
 function getRecordTour(r) {
   if (r.tour) return r.tour;
   // Registro viejo: "SM 10:00" → parsear, devolver todo menos la última parte
@@ -481,15 +485,19 @@ function calcPreview() {
     paxObj[p.name] = parseInt(document.getElementById(`pax-${i}`)?.value) || 0;
   });
 
+  const captados = parseInt(document.getElementById('pax-captados')?.value) || 0;
+
   let cash = 0;
   userConfig.paymentMethods.forEach((m, i) => {
     cash += parseFloat(document.getElementById(`pay-${i}`)?.value) || 0;
   });
 
   const { totalPax, fees, totalComm } = compute(paxObj);
+  const paxReal = totalPax + captados;
   const netGain = cash - totalComm;
 
-  setText('pv-pax', totalPax);
+  // "PAX total" del preview muestra la gente real del tour (plataformas + captados)
+  setText('pv-pax', paxReal);
   userConfig.platforms.forEach((p, i) => setText(`pv-plat-${i}`, euro(fees[p.name] || 0)));
   setText('pv-comm', euro(totalComm));
   setText('pv-cash', euro(cash));
@@ -516,6 +524,8 @@ async function guardarRegistro() {
     paxObj[p.name] = parseInt(document.getElementById(`pax-${i}`)?.value) || 0;
   });
 
+  const captados = parseInt(document.getElementById('pax-captados')?.value) || 0;
+
   const paymentsObj = {};
   let totalCash = 0;
   userConfig.paymentMethods.forEach((m, i) => {
@@ -531,6 +541,7 @@ async function guardarRegistro() {
   const record = {
     id, fecha, horario: horarioVal, tour, time,
     pax: paxObj, fees, payments: paymentsObj,
+    captados,
     totalPax, totalComm, totalCash, netGain
   };
 
@@ -552,6 +563,8 @@ function resetForm() {
     const el = document.getElementById(`pax-${i}`);
     if (el) el.value = 0;
   });
+  const capEl = document.getElementById('pax-captados');
+  if (capEl) capEl.value = 0;
   userConfig.paymentMethods.forEach((m, i) => {
     const el = document.getElementById(`pay-${i}`);
     if (el) el.value = 0;
@@ -578,16 +591,21 @@ function renderHistory() {
 function renderSummary(list) {
   const s = list.reduce((a, r) => {
     a.tours++;
-    a.pax  += r.totalPax;
-    a.comm += r.totalComm;
-    a.cash += getTotalCash(r);
-    a.net  += r.netGain;
+    a.pax      += r.totalPax;
+    a.captados += getRecordCaptados(r);
+    a.comm     += r.totalComm;
+    a.cash     += getTotalCash(r);
+    a.net      += r.netGain;
     return a;
-  }, { tours: 0, pax: 0, comm: 0, cash: 0, net: 0 });
+  }, { tours: 0, pax: 0, captados: 0, comm: 0, cash: 0, net: 0 });
+
+  const paxReal = s.pax + s.captados;
+  const promedio = paxReal > 0 ? euro(s.cash / paxReal) : '—';
 
   document.getElementById('summary-grid').innerHTML = `
     <div class="sum-card"><div class="sum-val c-acc">${s.tours}</div><div class="sum-lbl">Tours</div></div>
-    <div class="sum-card"><div class="sum-val c-acc">${s.pax}</div><div class="sum-lbl">PAX total</div></div>
+    <div class="sum-card"><div class="sum-val c-acc">${paxReal}</div><div class="sum-lbl">PAX total</div></div>
+    <div class="sum-card"><div class="sum-val">${promedio}</div><div class="sum-lbl">Promedio pax</div></div>
     <div class="sum-card"><div class="sum-val c-err">${euro(s.comm)}</div><div class="sum-lbl">Comisiones</div></div>
     <div class="sum-card"><div class="sum-val">${euro(s.cash)}</div><div class="sum-lbl">Total cobros</div></div>
     <div class="sum-card"><div class="sum-val ${s.net >= 0 ? 'c-ok' : 'c-err'}">${euro(s.net)}</div><div class="sum-lbl">Ganancia neta</div></div>
@@ -600,9 +618,9 @@ function renderTable(list) {
   const thead = document.getElementById('hist-head');
 
   const platCols = userConfig.platforms.map(p => `<th>${escHtml(p.name)}</th>`).join('');
-  thead.innerHTML = `<tr><th>Fecha</th><th>Tour</th><th>Horario</th><th>PAX</th>${platCols}<th>Comisiones</th><th>Cobros</th><th>Neta</th><th></th></tr>`;
+  thead.innerHTML = `<tr><th>Fecha</th><th>Tour</th><th>Horario</th><th>PAX</th><th class="th-capt">Capt.</th>${platCols}<th>Comisiones</th><th>Cobros</th><th>Neta</th><th></th></tr>`;
 
-  const numCols = 5 + userConfig.platforms.length + 3;
+  const numCols = 6 + userConfig.platforms.length + 3;
 
   if (list.length === 0) {
     tbody.innerHTML = `<tr><td colspan="${numCols}"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-msg">Sin registros para este mes</div></div></td></tr>`;
@@ -615,6 +633,7 @@ function renderTable(list) {
     const feesObj     = getRecordFees(r);
     const paymentsObj = getRecordPayments(r);
     const totalCash   = getTotalCash(r);
+    const captados    = getRecordCaptados(r);
 
     const platCells = userConfig.platforms.map((p, i) => `
       <td>
@@ -634,6 +653,7 @@ function renderTable(list) {
         <td class="td-tour">${escHtml(getRecordTour(r))}</td>
         <td><span class="badge ${isAM ? 'badge-am' : 'badge-pm'}">${escHtml(getRecordTime(r))}</span></td>
         <td><strong>${r.totalPax}</strong></td>
+        <td class="td-capt">${captados > 0 ? `<strong>${captados}</strong>` : '<span class="sub">—</span>'}</td>
         ${platCells}
         <td class="c-err"><strong>${euro(r.totalComm)}</strong></td>
         <td>
@@ -652,18 +672,20 @@ function renderTable(list) {
   }).join('');
 
   const s = list.reduce((a, r) => {
-    a.pax  += r.totalPax;
-    a.comm += r.totalComm;
-    a.cash += getTotalCash(r);
-    a.net  += r.netGain;
+    a.pax      += r.totalPax;
+    a.captados += getRecordCaptados(r);
+    a.comm     += r.totalComm;
+    a.cash     += getTotalCash(r);
+    a.net      += r.netGain;
     return a;
-  }, { pax: 0, comm: 0, cash: 0, net: 0 });
+  }, { pax: 0, captados: 0, comm: 0, cash: 0, net: 0 });
 
   const emptyPlatCols = userConfig.platforms.map(() => '<td>—</td>').join('');
   tfoot.innerHTML = `
     <tr>
       <td colspan="3">TOTAL MES</td>
       <td>${s.pax}</td>
+      <td class="td-capt">${s.captados || '—'}</td>
       ${emptyPlatCols}
       <td class="c-err">${euro(s.comm)}</td>
       <td>${euro(s.cash)}</td>
@@ -689,6 +711,8 @@ function openEdit(id) {
     const el = document.getElementById(`e-pax-${i}`);
     if (el) el.value = paxObj[p.name] || 0;
   });
+  const eCapEl = document.getElementById('e-pax-captados');
+  if (eCapEl) eCapEl.value = getRecordCaptados(r);
   userConfig.paymentMethods.forEach((m, i) => {
     const el = document.getElementById(`e-pay-${i}`);
     if (el) el.value = paymentsObj[m] || 0;
@@ -710,6 +734,8 @@ async function saveEdit() {
     paxObj[p.name] = parseInt(document.getElementById(`e-pax-${i}`)?.value) || 0;
   });
 
+  const captados = parseInt(document.getElementById('e-pax-captados')?.value) || 0;
+
   const paymentsObj = {};
   let totalCash = 0;
   userConfig.paymentMethods.forEach((m, i) => {
@@ -725,6 +751,7 @@ async function saveEdit() {
     id: editingId,
     fecha, horario: horarioVal, tour, time,
     pax: paxObj, fees, payments: paymentsObj,
+    captados,
     totalPax, totalComm, totalCash, netGain
   };
 
@@ -792,16 +819,21 @@ function renderHoy() {
 function renderHoySummary(list) {
   const s = list.reduce((a, r) => {
     a.tours++;
-    a.pax  += r.totalPax;
-    a.comm += r.totalComm;
-    a.cash += getTotalCash(r);
-    a.net  += r.netGain;
+    a.pax      += r.totalPax;
+    a.captados += getRecordCaptados(r);
+    a.comm     += r.totalComm;
+    a.cash     += getTotalCash(r);
+    a.net      += r.netGain;
     return a;
-  }, { tours: 0, pax: 0, comm: 0, cash: 0, net: 0 });
+  }, { tours: 0, pax: 0, captados: 0, comm: 0, cash: 0, net: 0 });
+
+  const paxReal = s.pax + s.captados;
+  const promedio = paxReal > 0 ? euro(s.cash / paxReal) : '—';
 
   document.getElementById('hoy-summary-grid').innerHTML = `
     <div class="sum-card"><div class="sum-val c-acc">${s.tours}</div><div class="sum-lbl">Tours</div></div>
-    <div class="sum-card"><div class="sum-val c-acc">${s.pax}</div><div class="sum-lbl">PAX total</div></div>
+    <div class="sum-card"><div class="sum-val c-acc">${paxReal}</div><div class="sum-lbl">PAX total</div></div>
+    <div class="sum-card"><div class="sum-val">${promedio}</div><div class="sum-lbl">Promedio pax</div></div>
     <div class="sum-card"><div class="sum-val c-err">${euro(s.comm)}</div><div class="sum-lbl">Comisiones</div></div>
     <div class="sum-card"><div class="sum-val">${euro(s.cash)}</div><div class="sum-lbl">Total cobros</div></div>
     <div class="sum-card"><div class="sum-val ${s.net >= 0 ? 'c-ok' : 'c-err'}">${euro(s.net)}</div><div class="sum-lbl">Ganancia neta</div></div>
@@ -813,13 +845,14 @@ function renderHoyTable(list) {
   const tbody = document.getElementById('hoy-body');
 
   const platCols = userConfig.platforms.map(p => `<th>${escHtml(p.name)}</th>`).join('');
-  thead.innerHTML = `<th>Tour</th><th>Horario</th><th>PAX</th>${platCols}<th>Comisiones</th><th>Cobros</th><th>Neta</th>`;
+  thead.innerHTML = `<th>Tour</th><th>Horario</th><th>PAX</th><th class="th-capt">Capt.</th>${platCols}<th>Comisiones</th><th>Cobros</th><th>Neta</th>`;
 
   tbody.innerHTML = list.map(r => {
     const paxObj      = getRecordPax(r);
     const feesObj     = getRecordFees(r);
     const paymentsObj = getRecordPayments(r);
     const totalCash   = getTotalCash(r);
+    const captados    = getRecordCaptados(r);
 
     const platCells = userConfig.platforms.map((p, i) => `
       <td>
@@ -838,6 +871,7 @@ function renderHoyTable(list) {
         <td class="td-tour">${escHtml(getRecordTour(r))}</td>
         <td><span class="badge ${isAM ? 'badge-am' : 'badge-pm'}">${escHtml(getRecordTime(r))}</span></td>
         <td><strong>${r.totalPax}</strong></td>
+        <td class="td-capt">${captados > 0 ? `<strong>${captados}</strong>` : '<span class="sub">—</span>'}</td>
         ${platCells}
         <td class="c-err"><strong>${euro(r.totalComm)}</strong></td>
         <td>
@@ -906,6 +940,7 @@ function renderPeriodo(list, desde, hasta) {
   const payTotals = {};
   userConfig.paymentMethods.forEach(m => payTotals[m] = 0);
   let totalComm = 0, totalCash = 0, netTotal = 0;
+  let totalPaxPlat = 0, totalCaptados = 0;
 
   list.forEach(r => {
     const feesObj     = getRecordFees(r);
@@ -916,10 +951,15 @@ function renderPeriodo(list, desde, hasta) {
     userConfig.paymentMethods.forEach(m => {
       payTotals[m] = (payTotals[m] || 0) + (paymentsObj[m] || 0);
     });
-    totalComm += r.totalComm;
-    totalCash += getTotalCash(r);
-    netTotal  += r.netGain;
+    totalComm     += r.totalComm;
+    totalCash     += getTotalCash(r);
+    netTotal      += r.netGain;
+    totalPaxPlat  += r.totalPax;
+    totalCaptados += getRecordCaptados(r);
   });
+
+  const paxReal  = totalPaxPlat + totalCaptados;
+  const promedio = paxReal > 0 ? euro(totalCash / paxReal) : '—';
 
   const platCards = userConfig.platforms.map((p, i) => `
     <div class="breakdown-card">
@@ -936,6 +976,14 @@ function renderPeriodo(list, desde, hasta) {
   `).join('');
 
   document.getElementById('breakdown-grid').innerHTML = `
+    <div class="breakdown-card">
+      <div class="breakdown-val c-acc">${paxReal}</div>
+      <div class="breakdown-lbl">PAX total</div>
+    </div>
+    <div class="breakdown-card">
+      <div class="breakdown-val">${promedio}</div>
+      <div class="breakdown-lbl">Promedio pax</div>
+    </div>
     ${platCards}
     <div class="breakdown-card" style="border-color:var(--danger);background:rgba(239,68,68,.04)">
       <div class="breakdown-val c-err">${euro(totalComm)}</div>
@@ -958,9 +1006,9 @@ function renderPeriodo(list, desde, hasta) {
   const thead = document.getElementById('periodo-head');
 
   const platHeaders = userConfig.platforms.map(p => `<th>${escHtml(p.name)}</th>`).join('');
-  thead.innerHTML = `<tr><th>Fecha</th><th>Tour</th><th>Horario</th><th>PAX</th>${platHeaders}<th>Comisiones</th><th>Cobros</th><th>Neta</th></tr>`;
+  thead.innerHTML = `<tr><th>Fecha</th><th>Tour</th><th>Horario</th><th>PAX</th><th class="th-capt">Capt.</th>${platHeaders}<th>Comisiones</th><th>Cobros</th><th>Neta</th></tr>`;
 
-  const numCols = 4 + userConfig.platforms.length + 3;
+  const numCols = 5 + userConfig.platforms.length + 3;
 
   if (list.length === 0) {
     tbody.innerHTML = `<tr><td colspan="${numCols}"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-msg">Sin registros en este período</div></div></td></tr>`;
@@ -973,6 +1021,7 @@ function renderPeriodo(list, desde, hasta) {
     const feesObj     = getRecordFees(r);
     const paymentsObj = getRecordPayments(r);
     const totalCashR  = getTotalCash(r);
+    const captados    = getRecordCaptados(r);
 
     const platCells = userConfig.platforms.map((p, i) => `
       <td>
@@ -992,6 +1041,7 @@ function renderPeriodo(list, desde, hasta) {
         <td class="td-tour">${escHtml(getRecordTour(r))}</td>
         <td><span class="badge ${isAM ? 'badge-am' : 'badge-pm'}">${escHtml(getRecordTime(r))}</span></td>
         <td><strong>${r.totalPax}</strong></td>
+        <td class="td-capt">${captados > 0 ? `<strong>${captados}</strong>` : '<span class="sub">—</span>'}</td>
         ${platCells}
         <td class="c-err"><strong>${euro(r.totalComm)}</strong></td>
         <td>
@@ -1007,7 +1057,8 @@ function renderPeriodo(list, desde, hasta) {
   tfoot.innerHTML = `
     <tr>
       <td colspan="3">TOTAL PERÍODO</td>
-      <td>—</td>
+      <td>${totalPaxPlat}</td>
+      <td class="td-capt">${totalCaptados || '—'}</td>
       ${emptyPlatCols}
       <td class="c-err">${euro(totalComm)}</td>
       <td>${euro(totalCash)}</td>
@@ -1036,7 +1087,7 @@ function exportCSVPeriodo() {
 function _downloadCSV(list, filename) {
   const platHeads = userConfig.platforms.flatMap(p => [`${p.name} PAX`, `${p.name} €`]);
   const payHeads  = [...userConfig.paymentMethods, 'Total Cobros'];
-  const heads     = ['Fecha','Tour','Horario','PAX Total', ...platHeads, 'Total Comisiones', ...payHeads, 'Ganancia Neta'];
+  const heads     = ['Fecha','Tour','Horario','PAX Total','Captados', ...platHeads, 'Total Comisiones', ...payHeads, 'Ganancia Neta'];
 
   const rows = list.map(r => {
     const paxObj      = getRecordPax(r);
@@ -1044,7 +1095,7 @@ function _downloadCSV(list, filename) {
     const paymentsObj = getRecordPayments(r);
     const platCols    = userConfig.platforms.flatMap(p => [paxObj[p.name]||0, (feesObj[p.name]||0).toFixed(2)]);
     const payCols     = [...userConfig.paymentMethods.map(m => (paymentsObj[m]||0).toFixed(2)), getTotalCash(r).toFixed(2)];
-    return [r.fecha, getRecordTour(r), getRecordTime(r), r.totalPax, ...platCols, r.totalComm.toFixed(2), ...payCols, r.netGain.toFixed(2)];
+    return [r.fecha, getRecordTour(r), getRecordTime(r), r.totalPax, getRecordCaptados(r), ...platCols, r.totalComm.toFixed(2), ...payCols, r.netGain.toFixed(2)];
   });
 
   const csv  = [heads, ...rows].map(r => r.join(';')).join('\r\n');

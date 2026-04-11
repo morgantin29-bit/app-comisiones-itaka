@@ -114,6 +114,13 @@
         </div>
 
         <div class="form-group full">
+          <label>Pasajeros captados <span class="label-hint">· sin comisión</span></label>
+          <div class="captados-wrap">
+            <input type="number" id="pax-captados" min="0" value="0" oninput="calcPreview()">
+          </div>
+        </div>
+
+        <div class="form-group full">
           <label>Cobros recibidos (€)</label>
           <div class="pax-row" id="payment-fields"></div>
         </div>
@@ -319,6 +326,12 @@
       <div class="form-group full">
         <label>Pasajeros por origen</label>
         <div class="pax-row" id="e-pax-fields"></div>
+      </div>
+      <div class="form-group full">
+        <label>Pasajeros captados <span class="label-hint">· sin comisión</span></label>
+        <div class="captados-wrap">
+          <input type="number" id="e-pax-captados" min="0" value="0">
+        </div>
       </div>
       <div class="form-group full">
         <label>Cobros recibidos (€)</label>

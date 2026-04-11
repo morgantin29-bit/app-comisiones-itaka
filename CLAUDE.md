@@ -123,20 +123,20 @@ Cada entrada tiene: nombre del tour + hora. En el dropdown de Registro se muestr
 ## Funcionalidades
 
 ### Vista Registrar
-- Formulario dinámico: fecha, dropdown "Tour" (configurable), PAX por plataforma, cobros por medio de pago
-- Preview en tiempo real de todos los cálculos
+- Formulario dinámico: fecha, dropdown "Tour" (configurable), PAX por plataforma, **Pasajeros captados** (input único sin comisión), cobros por medio de pago
+- Preview en tiempo real de todos los cálculos — "PAX total" refleja plataformas + captados (gente real del tour)
 - Guardar / Limpiar
 
 ### Vista Historial — Por mes
-- Navegación mes a mes, 5 tarjetas de resumen
-- Tabla dinámica: columnas Tour y Horario separadas + columnas por plataforma
+- Navegación mes a mes, **6 tarjetas de resumen** (Tours, PAX total, Promedio pax, Comisiones, Total cobros, Ganancia neta)
+- Tabla dinámica: columnas Tour, Horario, PAX, **Capt.** + columnas por plataforma
 - Editar (modal slide-up en móvil) / Eliminar con confirmación
-- Exportar CSV (BOM UTF-8, separador `;`, compatible con Excel) — incluye Tour y Horario como columnas separadas
+- Exportar CSV (BOM UTF-8, separador `;`, compatible con Excel) — incluye Tour, Horario y Captados como columnas separadas
 
 ### Vista Historial — Hoy
 - Tercer modo del historial; muestra solo los registros del día actual
 - Estado vacío si no hay tours registrados en el día
-- Resumen (tours, pax, comisiones, cobros, ganancia) + tabla sin columna Fecha
+- Resumen (tours, pax total, promedio pax, comisiones, cobros, ganancia) + tabla sin columna Fecha
 - Botón **"Exportar datos de hoy"** (con logo WhatsApp) → abre popup con resumen en texto plano
 - Formato del popup: fecha única al inicio (`📅 08/04 —`), luego cada tour con nombre + hora y pax por plataforma
 - Solo aparecen plataformas con pax > 0
@@ -178,7 +178,7 @@ Gris (conectando) → Naranja (guardando) → Verde (sincronizado) → Rojo (sin
 
 ## Modelo de datos
 
-### Registro (formato actual — v1.7+)
+### Registro (formato actual — v1.9+)
 ```js
 {
   id:         1234567890123,      // Date.now() — también ID del documento
@@ -189,16 +189,24 @@ Gris (conectando) → Naranja (guardando) → Verde (sincronizado) → Rojo (sin
   pax:        { 'Civitatis': 5, 'Viabam': 3, 'Web': 2 },
   fees:       { 'Civitatis': 15, 'Viabam': 7.5, 'Web': 4 },
   payments:   { 'Efectivo': 80, 'Revolut': 30 },
-  totalPax:   10,
+  captados:   2,                   // agregado en v1.9 — pasajeros sin comisión
+  totalPax:   10,                  // SOLO plataformas (no incluye captados)
   totalComm:  26.50,
   totalCash:  110.00,
   netGain:    83.50
 }
 ```
 
+**Notas sobre `totalPax` y captados:**
+- `totalPax` sigue contando **solo plataformas** para no romper la migración ni `compute()`.
+- El "PAX total real" (gente física del tour) se calcula al vuelo como `totalPax + captados` en cards y tablas.
+- "Promedio pax" = `totalCash / (totalPax + captados)` — los captados cuentan como asistentes aunque pagaron €0 (bajan el promedio, que refleja cuánto dejó cada persona real del tour al total).
+- Popup WhatsApp NO incluye captados (decisión del usuario — solo interesa comunicar pax por plataforma a los compañeros).
+
 **Compatibilidad con registros anteriores:**
 - v1.0–v1.2: helpers `getRecordPax(r)`, `getRecordFees(r)`, `getRecordPayments(r)` detectan campos viejos (`civitatis`, `viabam`, etc.)
 - v1.3–v1.6: registros con `horario: "SM 10:00"` sin `tour`/`time` → migración automática al abrir la app (`migrateOldRecords()`) + helpers `getRecordTour(r)` / `getRecordTime(r)` parsean al vuelo si la migración aún no corrió
+- v1.7–v1.8.1: registros sin campo `captados` → helper `getRecordCaptados(r)` devuelve 0 por default. Sin migración necesaria.
 
 ### Config de usuario
 ```js
@@ -287,3 +295,13 @@ Gris (conectando) → Naranja (guardando) → Verde (sincronizado) → Rojo (sin
 ### v1.8.1 — 10/04/2026
 - **Fix responsive móvil:** `.pax-row` y `.preview-row` con `minmax(120px)` en vez de `minmax(80px)` — con 4+ plataformas se distribuyen en 2+2 filas en lugar de 4 apretadas
 - **Nuevo breakpoint ≤380px:** fuerza 2 columnas y reduce labels para pantallas muy pequeñas (iPhone SE, etc.)
+
+### v1.9 — 11/04/2026
+- **Pasajeros captados:** nuevo campo fijo en el formulario Registro (y modal Editar) entre "Pasajeros por origen" y "Cobros recibidos". Input único con hint "sin comisión". Comisión 0, no genera `fees`.
+- **Promedio pax:** nueva tarjeta de resumen en las 3 pestañas del Historial (Por mes, Por período, Hoy), ubicada antes de "Comisiones". Fórmula: `totalCash ÷ (totalPax + captados)` — los captados cuentan como asistentes reales del tour aunque hayan pagado €0, así que bajan el promedio (refleja cuánto dejó cada persona del tour al total).
+- **PAX total realista:** la tarjeta "PAX total" en los 3 modos del historial ahora muestra plataformas + captados (gente física del tour).
+- **Columna "Capt." en tablas:** entre PAX y las plataformas, en las tablas de los 3 modos. Ancho 52px, centrada. Muestra "—" si el tour no tuvo captados.
+- **CSV actualizado:** columna "Captados" entre "PAX Total" y las plataformas.
+- **Popup WhatsApp sin cambios:** los captados NO aparecen en el texto copiado (decisión del usuario — los compañeros solo quieren saber pax por plataforma).
+- **Nuevo helper `getRecordCaptados(r)`:** con fallback a 0 — compatibilidad total con registros anteriores sin migración.
+- **Modelo de datos:** nuevo campo `captados` en los registros nuevos. `totalPax` mantiene su semántica original (solo plataformas) para no romper `compute()` ni la migración previa.
