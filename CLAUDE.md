@@ -283,3 +283,7 @@ Gris (conectando) → Naranja (guardando) → Verde (sincronizado) → Rojo (sin
 - **Copiar para WhatsApp** (con logo WhatsApp): copia el texto al portapapeles; confirma con "¡Copiado!" durante 2 segundos
 - Popup cierra tocando el fondo o el botón "Cerrar"
 - Logos WhatsApp: SVG inline en ambos botones — verde (#25D366) en "Exportar", color del botón en "Copiar"
+
+### v1.8.1 — 10/04/2026
+- **Fix responsive móvil:** `.pax-row` y `.preview-row` con `minmax(120px)` en vez de `minmax(80px)` — con 4+ plataformas se distribuyen en 2+2 filas en lugar de 4 apretadas
+- **Nuevo breakpoint ≤380px:** fuerza 2 columnas y reduce labels para pantallas muy pequeñas (iPhone SE, etc.)
