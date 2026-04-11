@@ -128,25 +128,28 @@ Cada entrada tiene: nombre del tour + hora. En el dropdown de Registro se muestr
 - Guardar / Limpiar
 
 ### Vista Historial — Por mes
-- Navegación mes a mes, **6 tarjetas de resumen** (Tours, PAX total, Promedio pax, Comisiones, Total cobros, Ganancia neta)
-- Tabla dinámica: columnas Tour, Horario, PAX, **Capt.** + columnas por plataforma
+- Navegación mes a mes, **6 tarjetas de resumen** (Tours · PAX total · Promedio pax global · Comisiones · Total cobros · Ganancia neta)
+- Tabla dinámica con columnas: Fecha · Tour · Horario · PAX · **Capt.** · [plataformas] · **Promedio** · Comisiones · Cobros · Neta · acciones
+- El footer de la tabla muestra los totales del mes + el promedio pax global en la columna Promedio
 - Editar (modal slide-up en móvil) / Eliminar con confirmación
-- Exportar CSV (BOM UTF-8, separador `;`, compatible con Excel) — incluye Tour, Horario y Captados como columnas separadas
+- Exportar CSV (BOM UTF-8, separador `;`, compatible con Excel) — incluye Tour, Horario, Captados y Promedio pax como columnas separadas
 
 ### Vista Historial — Hoy
 - Tercer modo del historial; muestra solo los registros del día actual
 - Estado vacío si no hay tours registrados en el día
-- Resumen (tours, pax total, promedio pax, comisiones, cobros, ganancia) + tabla sin columna Fecha
+- 6 tarjetas de resumen (Tours · PAX total · Promedio pax global · Comisiones · Total cobros · Ganancia neta) + tabla sin columna Fecha, con columnas Capt. y Promedio
 - Botón **"Exportar datos de hoy"** (con logo WhatsApp) → abre popup con resumen en texto plano
 - Formato del popup: fecha única al inicio (`📅 08/04 —`), luego cada tour con nombre + hora y pax por plataforma
-- Solo aparecen plataformas con pax > 0
+- Solo aparecen plataformas con pax > 0 — **captados NO se muestran en el popup** (decisión explícita)
 - Botón **"Copiar para WhatsApp"** (con logo WhatsApp) copia el texto al portapapeles; confirma con "¡Copiado!" por 2 segundos
 - Popup se cierra tocando el fondo o el botón "Cerrar"
 
 ### Vista Historial — Por período
 - Filtro libre por rango de fechas
-- Tarjetas de breakdown por plataforma y medio de pago
-- Tabla detallada con columnas Tour y Horario + exportar CSV del período
+- Breakdown grid con tarjetas dinámicas: PAX total · Promedio pax global · una tarjeta por plataforma (comisiones) · Total comisiones · una tarjeta por medio de pago · Total cobros · Ganancia neta
+- Tabla detallada con columnas Fecha, Tour, Horario, PAX, Capt., plataformas, Promedio, Comisiones, Cobros, Neta
+- Footer de la tabla muestra totales del período + promedio pax global en la columna Promedio
+- Exportar CSV del período (mismas columnas que el CSV mensual)
 
 ### Vista Configuración
 - Campo "Tu nombre" — se guarda en Firestore y aparece como saludo en el header
@@ -200,7 +203,9 @@ Gris (conectando) → Naranja (guardando) → Verde (sincronizado) → Rojo (sin
 **Notas sobre `totalPax` y captados:**
 - `totalPax` sigue contando **solo plataformas** para no romper la migración ni `compute()`.
 - El "PAX total real" (gente física del tour) se calcula al vuelo como `totalPax + captados` en cards y tablas.
-- "Promedio pax" = `totalCash / (totalPax + captados)` — los captados cuentan como asistentes aunque pagaron €0 (bajan el promedio, que refleja cuánto dejó cada persona real del tour al total).
+- **"Promedio pax global"** (tarjeta de resumen) = `Σ(totalCash) / Σ(totalPax + captados)` sobre todo el periodo visible. Es un promedio ponderado.
+- **"Promedio"** (columna por fila en la tabla) = `totalCash_tour / (totalPax_tour + captados_tour)` del tour individual.
+- Ambos promedios usan la misma fórmula conceptual (cobros ÷ gente real, captados incluidos aunque paguen €0). La tarjeta da la lectura agregada del periodo, la columna la lectura tour-por-tour. Coinciden si el periodo tiene un único tour.
 - Popup WhatsApp NO incluye captados (decisión del usuario — solo interesa comunicar pax por plataforma a los compañeros).
 
 **Compatibilidad con registros anteriores:**
@@ -296,12 +301,6 @@ Gris (conectando) → Naranja (guardando) → Verde (sincronizado) → Rojo (sin
 - **Fix responsive móvil:** `.pax-row` y `.preview-row` con `minmax(120px)` en vez de `minmax(80px)` — con 4+ plataformas se distribuyen en 2+2 filas en lugar de 4 apretadas
 - **Nuevo breakpoint ≤380px:** fuerza 2 columnas y reduce labels para pantallas muy pequeñas (iPhone SE, etc.)
 
-### v1.9.1 — 11/04/2026
-- **"Promedio pax global"** en la tarjeta de resumen (renombrado desde "Promedio pax"): deja claro que el valor es el promedio agregado de todos los tours del periodo (mes/hoy/período).
-- **Nueva columna "Promedio" en las tablas del historial:** ubicada entre las plataformas y "Comisiones", en los 3 modos (Por mes, Hoy, Por período). Muestra el promedio por tour individual: `totalCash_tour / (totalPax_tour + captados_tour)`. Coloreada en acento violeta para distinguirla visualmente del resto.
-- **Footer de las tablas** (Por mes y Por período) muestra el promedio global del periodo en la columna Promedio.
-- **CSV** incluye la nueva columna "Promedio pax" por tour, entre las plataformas y "Total Comisiones".
-
 ### v1.9 — 11/04/2026
 - **Pasajeros captados:** nuevo campo fijo en el formulario Registro (y modal Editar) entre "Pasajeros por origen" y "Cobros recibidos". Input único con hint "sin comisión". Comisión 0, no genera `fees`.
 - **Promedio pax:** nueva tarjeta de resumen en las 3 pestañas del Historial (Por mes, Por período, Hoy), ubicada antes de "Comisiones". Fórmula: `totalCash ÷ (totalPax + captados)` — los captados cuentan como asistentes reales del tour aunque hayan pagado €0, así que bajan el promedio (refleja cuánto dejó cada persona del tour al total).
@@ -311,3 +310,47 @@ Gris (conectando) → Naranja (guardando) → Verde (sincronizado) → Rojo (sin
 - **Popup WhatsApp sin cambios:** los captados NO aparecen en el texto copiado (decisión del usuario — los compañeros solo quieren saber pax por plataforma).
 - **Nuevo helper `getRecordCaptados(r)`:** con fallback a 0 — compatibilidad total con registros anteriores sin migración.
 - **Modelo de datos:** nuevo campo `captados` en los registros nuevos. `totalPax` mantiene su semántica original (solo plataformas) para no romper `compute()` ni la migración previa.
+
+### v1.9.1 — 11/04/2026 — ✅ ESTADO ACTUAL EN PRODUCCIÓN
+- **Tarjeta renombrada** `"Promedio pax"` → **`"Promedio pax global"`** en las 3 vistas del resumen, para distinguirla del promedio por tour individual.
+- **Nueva columna "Promedio" en las tablas** del historial: ubicada entre las plataformas y "Comisiones", en los 3 modos (Por mes, Hoy, Por período). Muestra el promedio por tour individual: `totalCash_tour / (totalPax_tour + captados_tour)`. Coloreada en acento violeta (`var(--accent)`) para distinguirla visualmente. Ancho 82px.
+- **Footer de las tablas** (Por mes y Por período) muestra el promedio global del periodo en la columna Promedio — coincide con el valor de la tarjeta superior.
+- **CSV** incluye la nueva columna "Promedio pax" por tour, entre las plataformas y "Total Comisiones".
+- **Semántica importante:** "Promedio pax global" (tarjeta) ≠ "Promedio" por fila. La tarjeta es un promedio ponderado de todo el periodo (total cobros ÷ total gente). La columna por fila es el promedio específico de ese tour. Coinciden cuando el periodo tiene un único tour; divergen según varíen los tours del periodo.
+
+---
+
+## Estado del repo y deploy (snapshot al 11/04/2026)
+
+### Rama y commits
+- **Rama activa en producción:** `main` — commit `a14f6fb` (feat: columna Promedio por tour + renombrar tarjeta a Promedio pax global, v1.9.1)
+- **Commit inmediatamente anterior:** `99cfe4f` (feat: pasajeros captados + tarjeta Promedio pax, v1.9)
+- **Tag de checkpoint:** `v1.8.1-stable` → apunta al commit `a119db7` (docs: agregar v1.8.1 al historial). Es el último punto estable antes de la feature de captados/promedio. Si hace falta revertir v1.9.x completo, usar este tag.
+- **Rama `feature/captados-promedio`**: todavía existe en `origin` (remote). Ya fue fusionada a `main` vía fast-forward. Se puede borrar con seguridad cuando convenga limpiar: `git push origin --delete feature/captados-promedio` + `git branch -d feature/captados-promedio`. No es urgente.
+
+### Deploy
+- Cada push a `main` dispara deploy automático a **https://app-comisiones-itaka.pages.dev** (~1 min).
+- **Variables de entorno de Firebase:** configuradas solo para el entorno **Production** de Cloudflare Pages. **NO están configuradas para Preview** → los preview deployments de ramas feature se cuelgan en el loading screen porque `/firebase-config` devuelve valores `undefined`.
+- **Implicancia práctica:** para probar cambios grandes sin arriesgar producción, las opciones son: (a) configurar las mismas env vars también en Preview en Cloudflare Pages Settings → Variables, o (b) hacer merge directo a main y usar un tag stable como red de seguridad para revertir con `git reset --hard <tag>` + `git push --force origin main` si algo falla. En la sesión del 11/04/2026 se usó la opción (b).
+
+### Comandos de emergencia — volver a v1.8.1
+Si v1.9.x presenta algún bug crítico en producción y hay que revertir al estado pre-captados:
+
+```bash
+cd "d:/Herramientas personales/Appcomisiones-itaka"
+git checkout main
+git reset --hard v1.8.1-stable
+git push origin main --force
+```
+
+Cloudflare redeploya la versión vieja en ~1 min. Los registros nuevos con captados quedan guardados en Firestore pero la UI vieja los ignora (es un campo extra, no rompe nada). Al re-mergear v1.9.x, los captados vuelven a aparecer.
+
+---
+
+## Próximos pasos sugeridos (ideas abiertas, no compromisos)
+
+- **Borrar rama `feature/captados-promedio`** del remoto cuando estés cómodo con v1.9.1 ya corriendo unos días en producción.
+- **Configurar env vars de Cloudflare para Preview** si en el futuro querés probar ramas feature sin tocar main.
+- **Input de captados en el preview del formulario:** actualmente el preview de "PAX total" muestra plataformas + captados pero no hay una celda dedicada de "captados" en el preview. Agregar si se vuelve confuso.
+- **Tooltip sobre "Promedio"** explicando que incluye captados, por si un compañero lo ve y no entiende la divergencia con otras cuentas. Baja prioridad.
+- **Mostrar "PAX real" en cada fila** (actualmente la fila muestra solo `totalPax` = plataformas y Capt. en columna aparte — la suma queda implícita). Evaluar si ayuda.
