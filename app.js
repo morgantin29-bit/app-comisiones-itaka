@@ -605,7 +605,7 @@ function renderSummary(list) {
   document.getElementById('summary-grid').innerHTML = `
     <div class="sum-card"><div class="sum-val c-acc">${s.tours}</div><div class="sum-lbl">Tours</div></div>
     <div class="sum-card"><div class="sum-val c-acc">${paxReal}</div><div class="sum-lbl">PAX total</div></div>
-    <div class="sum-card"><div class="sum-val">${promedio}</div><div class="sum-lbl">Promedio pax</div></div>
+    <div class="sum-card"><div class="sum-val">${promedio}</div><div class="sum-lbl">Promedio pax global</div></div>
     <div class="sum-card"><div class="sum-val c-err">${euro(s.comm)}</div><div class="sum-lbl">Comisiones</div></div>
     <div class="sum-card"><div class="sum-val">${euro(s.cash)}</div><div class="sum-lbl">Total cobros</div></div>
     <div class="sum-card"><div class="sum-val ${s.net >= 0 ? 'c-ok' : 'c-err'}">${euro(s.net)}</div><div class="sum-lbl">Ganancia neta</div></div>
@@ -618,9 +618,9 @@ function renderTable(list) {
   const thead = document.getElementById('hist-head');
 
   const platCols = userConfig.platforms.map(p => `<th>${escHtml(p.name)}</th>`).join('');
-  thead.innerHTML = `<tr><th>Fecha</th><th>Tour</th><th>Horario</th><th>PAX</th><th class="th-capt">Capt.</th>${platCols}<th>Comisiones</th><th>Cobros</th><th>Neta</th><th></th></tr>`;
+  thead.innerHTML = `<tr><th>Fecha</th><th>Tour</th><th>Horario</th><th>PAX</th><th class="th-capt">Capt.</th>${platCols}<th class="th-prom">Promedio</th><th>Comisiones</th><th>Cobros</th><th>Neta</th><th></th></tr>`;
 
-  const numCols = 6 + userConfig.platforms.length + 3;
+  const numCols = 7 + userConfig.platforms.length + 3;
 
   if (list.length === 0) {
     tbody.innerHTML = `<tr><td colspan="${numCols}"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-msg">Sin registros para este mes</div></div></td></tr>`;
@@ -634,6 +634,8 @@ function renderTable(list) {
     const paymentsObj = getRecordPayments(r);
     const totalCash   = getTotalCash(r);
     const captados    = getRecordCaptados(r);
+    const paxRealTour = r.totalPax + captados;
+    const promTour    = paxRealTour > 0 ? euro(totalCash / paxRealTour) : '—';
 
     const platCells = userConfig.platforms.map((p, i) => `
       <td>
@@ -655,6 +657,7 @@ function renderTable(list) {
         <td><strong>${r.totalPax}</strong></td>
         <td class="td-capt">${captados > 0 ? `<strong>${captados}</strong>` : '<span class="sub">—</span>'}</td>
         ${platCells}
+        <td class="td-prom"><strong>${promTour}</strong></td>
         <td class="c-err"><strong>${euro(r.totalComm)}</strong></td>
         <td>
           ${euro(totalCash)}
@@ -680,6 +683,9 @@ function renderTable(list) {
     return a;
   }, { pax: 0, captados: 0, comm: 0, cash: 0, net: 0 });
 
+  const paxRealMes = s.pax + s.captados;
+  const promGlobalMes = paxRealMes > 0 ? euro(s.cash / paxRealMes) : '—';
+
   const emptyPlatCols = userConfig.platforms.map(() => '<td>—</td>').join('');
   tfoot.innerHTML = `
     <tr>
@@ -687,6 +693,7 @@ function renderTable(list) {
       <td>${s.pax}</td>
       <td class="td-capt">${s.captados || '—'}</td>
       ${emptyPlatCols}
+      <td class="td-prom">${promGlobalMes}</td>
       <td class="c-err">${euro(s.comm)}</td>
       <td>${euro(s.cash)}</td>
       <td class="${s.net >= 0 ? 'c-ok' : 'c-err'}">${euro(s.net)}</td>
@@ -833,7 +840,7 @@ function renderHoySummary(list) {
   document.getElementById('hoy-summary-grid').innerHTML = `
     <div class="sum-card"><div class="sum-val c-acc">${s.tours}</div><div class="sum-lbl">Tours</div></div>
     <div class="sum-card"><div class="sum-val c-acc">${paxReal}</div><div class="sum-lbl">PAX total</div></div>
-    <div class="sum-card"><div class="sum-val">${promedio}</div><div class="sum-lbl">Promedio pax</div></div>
+    <div class="sum-card"><div class="sum-val">${promedio}</div><div class="sum-lbl">Promedio pax global</div></div>
     <div class="sum-card"><div class="sum-val c-err">${euro(s.comm)}</div><div class="sum-lbl">Comisiones</div></div>
     <div class="sum-card"><div class="sum-val">${euro(s.cash)}</div><div class="sum-lbl">Total cobros</div></div>
     <div class="sum-card"><div class="sum-val ${s.net >= 0 ? 'c-ok' : 'c-err'}">${euro(s.net)}</div><div class="sum-lbl">Ganancia neta</div></div>
@@ -845,7 +852,7 @@ function renderHoyTable(list) {
   const tbody = document.getElementById('hoy-body');
 
   const platCols = userConfig.platforms.map(p => `<th>${escHtml(p.name)}</th>`).join('');
-  thead.innerHTML = `<th>Tour</th><th>Horario</th><th>PAX</th><th class="th-capt">Capt.</th>${platCols}<th>Comisiones</th><th>Cobros</th><th>Neta</th>`;
+  thead.innerHTML = `<th>Tour</th><th>Horario</th><th>PAX</th><th class="th-capt">Capt.</th>${platCols}<th class="th-prom">Promedio</th><th>Comisiones</th><th>Cobros</th><th>Neta</th>`;
 
   tbody.innerHTML = list.map(r => {
     const paxObj      = getRecordPax(r);
@@ -853,6 +860,8 @@ function renderHoyTable(list) {
     const paymentsObj = getRecordPayments(r);
     const totalCash   = getTotalCash(r);
     const captados    = getRecordCaptados(r);
+    const paxRealTour = r.totalPax + captados;
+    const promTour    = paxRealTour > 0 ? euro(totalCash / paxRealTour) : '—';
 
     const platCells = userConfig.platforms.map((p, i) => `
       <td>
@@ -873,6 +882,7 @@ function renderHoyTable(list) {
         <td><strong>${r.totalPax}</strong></td>
         <td class="td-capt">${captados > 0 ? `<strong>${captados}</strong>` : '<span class="sub">—</span>'}</td>
         ${platCells}
+        <td class="td-prom"><strong>${promTour}</strong></td>
         <td class="c-err"><strong>${euro(r.totalComm)}</strong></td>
         <td>
           ${euro(totalCash)}
@@ -982,7 +992,7 @@ function renderPeriodo(list, desde, hasta) {
     </div>
     <div class="breakdown-card">
       <div class="breakdown-val">${promedio}</div>
-      <div class="breakdown-lbl">Promedio pax</div>
+      <div class="breakdown-lbl">Promedio pax global</div>
     </div>
     ${platCards}
     <div class="breakdown-card" style="border-color:var(--danger);background:rgba(239,68,68,.04)">
@@ -1006,9 +1016,9 @@ function renderPeriodo(list, desde, hasta) {
   const thead = document.getElementById('periodo-head');
 
   const platHeaders = userConfig.platforms.map(p => `<th>${escHtml(p.name)}</th>`).join('');
-  thead.innerHTML = `<tr><th>Fecha</th><th>Tour</th><th>Horario</th><th>PAX</th><th class="th-capt">Capt.</th>${platHeaders}<th>Comisiones</th><th>Cobros</th><th>Neta</th></tr>`;
+  thead.innerHTML = `<tr><th>Fecha</th><th>Tour</th><th>Horario</th><th>PAX</th><th class="th-capt">Capt.</th>${platHeaders}<th class="th-prom">Promedio</th><th>Comisiones</th><th>Cobros</th><th>Neta</th></tr>`;
 
-  const numCols = 5 + userConfig.platforms.length + 3;
+  const numCols = 6 + userConfig.platforms.length + 3;
 
   if (list.length === 0) {
     tbody.innerHTML = `<tr><td colspan="${numCols}"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-msg">Sin registros en este período</div></div></td></tr>`;
@@ -1022,6 +1032,8 @@ function renderPeriodo(list, desde, hasta) {
     const paymentsObj = getRecordPayments(r);
     const totalCashR  = getTotalCash(r);
     const captados    = getRecordCaptados(r);
+    const paxRealTour = r.totalPax + captados;
+    const promTour    = paxRealTour > 0 ? euro(totalCashR / paxRealTour) : '—';
 
     const platCells = userConfig.platforms.map((p, i) => `
       <td>
@@ -1043,6 +1055,7 @@ function renderPeriodo(list, desde, hasta) {
         <td><strong>${r.totalPax}</strong></td>
         <td class="td-capt">${captados > 0 ? `<strong>${captados}</strong>` : '<span class="sub">—</span>'}</td>
         ${platCells}
+        <td class="td-prom"><strong>${promTour}</strong></td>
         <td class="c-err"><strong>${euro(r.totalComm)}</strong></td>
         <td>
           ${euro(totalCashR)}
@@ -1060,6 +1073,7 @@ function renderPeriodo(list, desde, hasta) {
       <td>${totalPaxPlat}</td>
       <td class="td-capt">${totalCaptados || '—'}</td>
       ${emptyPlatCols}
+      <td class="td-prom">${promedio}</td>
       <td class="c-err">${euro(totalComm)}</td>
       <td>${euro(totalCash)}</td>
       <td class="${netTotal >= 0 ? 'c-ok' : 'c-err'}">${euro(netTotal)}</td>
@@ -1087,15 +1101,18 @@ function exportCSVPeriodo() {
 function _downloadCSV(list, filename) {
   const platHeads = userConfig.platforms.flatMap(p => [`${p.name} PAX`, `${p.name} €`]);
   const payHeads  = [...userConfig.paymentMethods, 'Total Cobros'];
-  const heads     = ['Fecha','Tour','Horario','PAX Total','Captados', ...platHeads, 'Total Comisiones', ...payHeads, 'Ganancia Neta'];
+  const heads     = ['Fecha','Tour','Horario','PAX Total','Captados', ...platHeads, 'Promedio pax', 'Total Comisiones', ...payHeads, 'Ganancia Neta'];
 
   const rows = list.map(r => {
     const paxObj      = getRecordPax(r);
     const feesObj     = getRecordFees(r);
     const paymentsObj = getRecordPayments(r);
+    const captados    = getRecordCaptados(r);
+    const paxRealTour = r.totalPax + captados;
+    const promTour    = paxRealTour > 0 ? (getTotalCash(r) / paxRealTour).toFixed(2) : '0.00';
     const platCols    = userConfig.platforms.flatMap(p => [paxObj[p.name]||0, (feesObj[p.name]||0).toFixed(2)]);
     const payCols     = [...userConfig.paymentMethods.map(m => (paymentsObj[m]||0).toFixed(2)), getTotalCash(r).toFixed(2)];
-    return [r.fecha, getRecordTour(r), getRecordTime(r), r.totalPax, getRecordCaptados(r), ...platCols, r.totalComm.toFixed(2), ...payCols, r.netGain.toFixed(2)];
+    return [r.fecha, getRecordTour(r), getRecordTime(r), r.totalPax, captados, ...platCols, promTour, r.totalComm.toFixed(2), ...payCols, r.netGain.toFixed(2)];
   });
 
   const csv  = [heads, ...rows].map(r => r.join(';')).join('\r\n');

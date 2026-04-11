@@ -296,6 +296,12 @@ Gris (conectando) → Naranja (guardando) → Verde (sincronizado) → Rojo (sin
 - **Fix responsive móvil:** `.pax-row` y `.preview-row` con `minmax(120px)` en vez de `minmax(80px)` — con 4+ plataformas se distribuyen en 2+2 filas en lugar de 4 apretadas
 - **Nuevo breakpoint ≤380px:** fuerza 2 columnas y reduce labels para pantallas muy pequeñas (iPhone SE, etc.)
 
+### v1.9.1 — 11/04/2026
+- **"Promedio pax global"** en la tarjeta de resumen (renombrado desde "Promedio pax"): deja claro que el valor es el promedio agregado de todos los tours del periodo (mes/hoy/período).
+- **Nueva columna "Promedio" en las tablas del historial:** ubicada entre las plataformas y "Comisiones", en los 3 modos (Por mes, Hoy, Por período). Muestra el promedio por tour individual: `totalCash_tour / (totalPax_tour + captados_tour)`. Coloreada en acento violeta para distinguirla visualmente del resto.
+- **Footer de las tablas** (Por mes y Por período) muestra el promedio global del periodo en la columna Promedio.
+- **CSV** incluye la nueva columna "Promedio pax" por tour, entre las plataformas y "Total Comisiones".
+
 ### v1.9 — 11/04/2026
 - **Pasajeros captados:** nuevo campo fijo en el formulario Registro (y modal Editar) entre "Pasajeros por origen" y "Cobros recibidos". Input único con hint "sin comisión". Comisión 0, no genera `fees`.
 - **Promedio pax:** nueva tarjeta de resumen en las 3 pestañas del Historial (Por mes, Por período, Hoy), ubicada antes de "Comisiones". Fórmula: `totalCash ÷ (totalPax + captados)` — los captados cuentan como asistentes reales del tour aunque hayan pagado €0, así que bajan el promedio (refleja cuánto dejó cada persona del tour al total).
