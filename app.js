@@ -392,8 +392,13 @@ function setText(id, v) { const el = document.getElementById(id); if (el) el.tex
 function escHtml(s)  { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 function sortRecords() {
-  records.sort((a, b) =>
-    a.fecha.localeCompare(b.fecha) || a.horario.localeCompare(b.horario));
+  records.sort((a, b) => {
+    const dateCmp = a.fecha.localeCompare(b.fecha);
+    if (dateCmp !== 0) return dateCmp;
+    const tourCmp = getRecordTour(a).localeCompare(getRecordTour(b));
+    if (tourCmp !== 0) return tourCmp;
+    return getRecordTime(a).localeCompare(getRecordTime(b), undefined, { numeric: true });
+  });
 }
 
 /* ── Compatibilidad con registros en formato anterior ── */
