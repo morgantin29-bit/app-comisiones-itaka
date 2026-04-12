@@ -311,39 +311,43 @@ Gris (conectando) → Naranja (guardando) → Verde (sincronizado) → Rojo (sin
 - **Nuevo helper `getRecordCaptados(r)`:** con fallback a 0 — compatibilidad total con registros anteriores sin migración.
 - **Modelo de datos:** nuevo campo `captados` en los registros nuevos. `totalPax` mantiene su semántica original (solo plataformas) para no romper `compute()` ni la migración previa.
 
-### v1.9.1 — 11/04/2026 — ✅ ESTADO ACTUAL EN PRODUCCIÓN
+### v1.9.1 — 11/04/2026
 - **Tarjeta renombrada** `"Promedio pax"` → **`"Promedio pax global"`** en las 3 vistas del resumen, para distinguirla del promedio por tour individual.
 - **Nueva columna "Promedio" en las tablas** del historial: ubicada entre las plataformas y "Comisiones", en los 3 modos (Por mes, Hoy, Por período). Muestra el promedio por tour individual: `totalCash_tour / (totalPax_tour + captados_tour)`. Coloreada en acento violeta (`var(--accent)`) para distinguirla visualmente. Ancho 82px.
 - **Footer de las tablas** (Por mes y Por período) muestra el promedio global del periodo en la columna Promedio — coincide con el valor de la tarjeta superior.
 - **CSV** incluye la nueva columna "Promedio pax" por tour, entre las plataformas y "Total Comisiones".
 - **Semántica importante:** "Promedio pax global" (tarjeta) ≠ "Promedio" por fila. La tarjeta es un promedio ponderado de todo el periodo (total cobros ÷ total gente). La columna por fila es el promedio específico de ese tour. Coinciden cuando el periodo tiene un único tour; divergen según varíen los tours del periodo.
 
+### v1.9.2 — 12/04/2026 — ✅ ESTADO ACTUAL EN PRODUCCIÓN
+- **Fix: orden de tours por horario numérico.** `sortRecords()` usaba `localeCompare` alfabético sobre `horario`, lo que ponía "12:30" antes de "9:30". Ahora usa `localeCompare` con `{ numeric: true }` sobre el campo `time`, ordenando correctamente por hora real.
+- Afecta todas las vistas: tablas del historial (por mes, por período, hoy) y popup de WhatsApp.
+- **Tag de checkpoint:** `v1.9.1-stable` creado antes del cambio.
+
 ---
 
-## Estado del repo y deploy (snapshot al 11/04/2026)
+## Estado del repo y deploy (snapshot al 12/04/2026)
 
 ### Rama y commits
-- **Rama activa en producción:** `main` — commit `a14f6fb` (feat: columna Promedio por tour + renombrar tarjeta a Promedio pax global, v1.9.1)
-- **Commit inmediatamente anterior:** `99cfe4f` (feat: pasajeros captados + tarjeta Promedio pax, v1.9)
-- **Tag de checkpoint:** `v1.8.1-stable` → apunta al commit `a119db7` (docs: agregar v1.8.1 al historial). Es el último punto estable antes de la feature de captados/promedio. Si hace falta revertir v1.9.x completo, usar este tag.
-- **Rama `feature/captados-promedio`**: todavía existe en `origin` (remote). Ya fue fusionada a `main` vía fast-forward. Se puede borrar con seguridad cuando convenga limpiar: `git push origin --delete feature/captados-promedio` + `git branch -d feature/captados-promedio`. No es urgente.
+- **Rama activa en producción:** `main` — commit `fd24a44` (fix: ordenar tours por horario numérico en vez de alfabético, v1.9.2)
+- **Tags de checkpoint:** `v1.9.1-stable` → commit `d6dc621` (último estado antes de v1.9.2). `v1.8.1-stable` → commit `a119db7` (último estado antes de captados/promedio).
+- **Rama `feature/captados-promedio`**: todavía existe en `origin` (remote). Ya fue fusionada a `main`. Se puede borrar con seguridad.
 
 ### Deploy
 - Cada push a `main` dispara deploy automático a **https://app-comisiones-itaka.pages.dev** (~1 min).
 - **Variables de entorno de Firebase:** configuradas solo para el entorno **Production** de Cloudflare Pages. **NO están configuradas para Preview** → los preview deployments de ramas feature se cuelgan en el loading screen porque `/firebase-config` devuelve valores `undefined`.
 - **Implicancia práctica:** para probar cambios grandes sin arriesgar producción, las opciones son: (a) configurar las mismas env vars también en Preview en Cloudflare Pages Settings → Variables, o (b) hacer merge directo a main y usar un tag stable como red de seguridad para revertir con `git reset --hard <tag>` + `git push --force origin main` si algo falla. En la sesión del 11/04/2026 se usó la opción (b).
 
-### Comandos de emergencia — volver a v1.8.1
-Si v1.9.x presenta algún bug crítico en producción y hay que revertir al estado pre-captados:
+### Comandos de emergencia
+Revertir a cualquier tag stable:
 
 ```bash
 cd "d:/Herramientas personales/Appcomisiones-itaka"
 git checkout main
-git reset --hard v1.8.1-stable
+git reset --hard <tag>        # v1.9.1-stable o v1.8.1-stable
 git push origin main --force
 ```
 
-Cloudflare redeploya la versión vieja en ~1 min. Los registros nuevos con captados quedan guardados en Firestore pero la UI vieja los ignora (es un campo extra, no rompe nada). Al re-mergear v1.9.x, los captados vuelven a aparecer.
+Cloudflare redeploya en ~1 min. Los datos en Firestore no se pierden — campos nuevos se ignoran en versiones viejas.
 
 ---
 
